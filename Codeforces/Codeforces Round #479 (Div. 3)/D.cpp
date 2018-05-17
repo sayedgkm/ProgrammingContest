@@ -46,30 +46,27 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+ll ar[N];
+map<ll,int> mp,mp1;
+vector<ll> ans;
+int n;
+bool go(ll st){
+    ans.clear();
+    mp1 = mp;
+    mp1[st]--;
+    ans.pb(st);
+    while(ans.size()!=n) {
+        if(mp1.count(st*2)){
+            mp1[st*2]--;
+            ans.pb(st*2);
+            st*=2;
+        } else if(st%3==0&&mp1[st/3]) {
+            mp1[st/3]--;
+            st/=3;
+            ans.pb(st);
+        } else return false;
     }
+    return true;
 }
 int main(){
     #ifdef sayed
@@ -78,22 +75,17 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
 
-        printf("%lld\n",ans);
+     n = nxt();
+    for(int i = 0;i<n;i++) {
+        ar[i] = lxt();
+        mp[ar[i]]++;
+    }
+    for(int i = 0;i<n;i++) if(go(ar[i])) {
+
+        for(auto it : ans) printf("%lld ",it);
+        printf("\n");
+        return 0;
     }
 
 

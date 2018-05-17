@@ -46,30 +46,61 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+int ar[N];
+ll shift[65];
+ll find_level(ll val) {
+    for(ll i = 0; ;i++) {
+        ll lo = 1LL<<i;
+        ll hi =1LL<<(i+1);
+        if(val>=lo and val<hi) return i;
     }
+}
+ll update1(ll val,ll k) {
+    ll level = find_level(val);
+    ll mod = 1LL<<level;
+    k%=mod;
+    if(k<0) k = mod+k;
+    shift[level]+=k;
+    shift[level]%=mod;
+
+}
+ll update2(ll val,ll k) {
+    ll level = find_level(val);
+    ll mod = 1LL<<level;
+    k%=mod;
+    if(k<0) k = mod+k;
+    for(int i = level;i<=60;i++) {
+        shift[i]+=k;
+        shift[i]%=mod;
+        k*=2LL;
+        mod*=2LL;
+    }
+
+}
+void print(ll val) {
+    ll level= find_level(val);
+    ll mod = 1LL<<level;
+    ll lo=mod;
+    ll hi= mod*2;
+    debug(shift[level]);
+    val = val+shift[level];
+    if(val>hi-1) {
+        val= (lo)+(val-hi);
+    }
+    while(val) {
+        lo = mod;
+        hi = mod*2;
+        if(val-shift[level]<lo) {
+            ll baki = shift[level]-(val-lo);
+            printf("%lld ",hi-baki);
+        } else {
+            printf("%lld ",val-shift[level]);
+        }
+        val/=2;
+        mod/=2;
+        level--;
+    }
+    printf("\n");
 }
 int main(){
     #ifdef sayed
@@ -78,22 +109,21 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
+    int q = nxt();
+    while(q--) {
+        int t= nxt();
+        if(t==1) {
+            ll val = lxt();
+            ll k = lxt();
+            update1(val,k);
+        } else if(t==2) {
+            ll val = lxt();
+            ll k = lxt();
+            update2(val,k);
+        } else {
+            print(lxt());
+        }
+       // debug(shift[3]);
     }
 
 

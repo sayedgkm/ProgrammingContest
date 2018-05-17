@@ -46,30 +46,23 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
+int ar[N];
+ll nc2(ll n) {
+    return (n*n-n)/2LL;
 }
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
+#include <ext/pb_ds/assoc_container.hpp> // Common file
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+typedef tree<int,null_type,less<int>,rb_tree_tag,tree_order_statistics_node_update>ordered_set;
+vector<int> ans;
+ ordered_set st;
 
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
+ll go(int mid) {
+    int val = *st.find_by_order(mid);
+    ll ans = st.order_of_key(val);
+    ans+=nc2(st.size()-1);
+    return ans;
+
 }
 int main(){
     #ifdef sayed
@@ -78,25 +71,28 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
+
     int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    ll k =lxt();
+    for(int i = 1;i<=n;i++) st.insert(i);
 
-        printf("%lld\n",ans);
+    for(int i =1;i<=n;i++) {
+        int b = 0;
+        int e = st.size()-1;
+        while(b<=e) {
+            int mid = (b+e)/2;
+            if(go(mid)>=k) {
+                e = mid-1;
+            } else b = mid+1;
+        }
+        int val = *st.find_by_order(b);
+        k-=st.order_of_key(val);
+        st.erase(st.find(val));
+        ans.pb(val);
+
     }
-
-
+    for(auto it : ans) printf("%d ",it);
+    printf("\n");
 
     return 0;
 }

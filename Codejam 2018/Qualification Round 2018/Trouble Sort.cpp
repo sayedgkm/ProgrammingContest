@@ -46,57 +46,59 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
+int ar[N];
+int Sort(int n) {
+    bool done = false;
+    while(!done){
+        done = true;
+        for(int i = 0;i<n-2;i++) {
+            if(ar[i]>ar[i+2]) {
+                swap(ar[i],ar[i+2]);
+                done = false;
+            }
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
     }
+    for(int i = 0;i<n-1;i++) {
+        if(ar[i]>ar[i+1]){
+            debug(i);
+            return 0;
+        }
+    }
+    debug("ok");
 }
+map<int,vector<int> > mp;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
-    // freopen("in.txt","r",stdin);
+     freopen("in.txt","r",stdin);
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int test = nxt();
+    int cs = 1;
+    while(test--) {
+        mp.clear();
+        int n= nxt();
+        for(int i=0;i<n;i++){
+            ar[i] = nxt();
+            mp[ar[i]].resize(2);
+            mp[ar[i]][i%2]++;
+        }
+        //Sort(n);
+        printf("Case #%d: ",cs++);
+        sort(ar,ar+n);
+        bool ok = true;
+        for(int i= 0;i<n;i++) {
+            if(mp[ar[i]][i%2]==0){
+                ok = false;
+                printf("%d\n",i);
+                break;
+            }
+            mp[ar[i]][i%2]--;
+        }
+        if(ok) printf("OK\n");
+
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
-
 
     return 0;
 }

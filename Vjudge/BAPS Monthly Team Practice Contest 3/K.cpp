@@ -46,30 +46,17 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
+int ar[N];
+ll go(ll k) {
+     ll sq = sqrt(k);
+        ll c = 0;
+        for(int i = 1;i<=sq;i++) {
+            if(k%i==0) {
+                c+=2;
+            }
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
+        if(sq*sq==k) c--;
+        return c;
 }
 int main(){
     #ifdef sayed
@@ -78,25 +65,32 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+
+    ll a= lxt();
+    ll b= lxt();
+    ll k = lxt();
+    if(a==b){
+        if(k>b){
+            printf("infinity\n");
+        } else {
+           if(k==1||a%k==0) {
+                cout<<go(a)<<endl;
+           } else {
+                ll tmp = a%k;
+                ll ans = go(tmp);
+                cout<<ans+ans<<endl;
+                return 0;
+           }
+        }
+        return 0;
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    if(k>b){
+        printf("infinity\n");
+    } else {
 
-        printf("%lld\n",ans);
+        cout<<go(k)<<endl;
+
     }
-
-
 
     return 0;
 }

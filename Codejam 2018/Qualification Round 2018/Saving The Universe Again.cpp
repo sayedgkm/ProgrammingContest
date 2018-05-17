@@ -46,56 +46,54 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+int ar[N];
+ll go(string &s) {
+    ll sum = 0;
+    ll shoot = 1;
+    for(int i= 0;i<s.length();i++) {
+        if(s[i]=='C') shoot*=2LL;
+        else sum+=shoot;
     }
+    return sum;
 }
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
     // freopen("in.txt","r",stdin);
     #endif
-    //ios_base::sync_with_stdio(false);
-    //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    int test;
+    cin>>test;
+    int cs = 1;
+    while(test--) {
+        ll d;
+        string s;
+        cin>>d>>s;
+        cout<<"Case #"<<cs++<<": ";
+        ll cost = go(s);
+        if(cost<=d) {
+            cout<<0<<endl;
+        } else {
+            int cnts = 0;
+            for(char lol : s) {
+                if(lol=='S') cnts++;
+            }
+            if(cnts>d) {
+                cout<<"IMPOSSIBLE"<<endl;
+            } else {
+                int c = 0;
+                while(go(s)>d) {
+                    for(int i=s.length()-1;i>=1;i--) {
+                        if(s[i]=='S'&&s[i-1]=='C'){swap(s[i],s[i-1]); break;}
+                    }
+                    c++;
+                }
+                cout<<c<<endl;
+            }
+        }
 
-        printf("%lld\n",ans);
     }
-
 
 
     return 0;

@@ -46,30 +46,28 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
+int ar[N];
+char s[10][200];
+int sx ,sy ;
+int go(int i,int j) {
 
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
+    if(s[i][j]=='#') return 0;
+    if(i==sx&&j==sy) return 1;
+
+    int res = 0;
+    if(i<sx) res+=go(i+1,j);
+    if(j<sy) res+=go(i,j+1);
+    return res;
 }
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
+int go1(int i,int j) {
+    //debug(i,j);
+    if(s[i][j]=='#') return 0;
+    if(i==sx&&j==sy) return 1;
 
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
+    int res = 0;
+    if(i>0) res+=go1(i-1,j);
+    if(j<sy) res+=go1(i,j+1);
+    return res;
 }
 int main(){
     #ifdef sayed
@@ -78,25 +76,65 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
+//    int n= nxt();
+//    int m = nxt();
+//    for(int i = 0;i<n;i++) {
+//        scanf("%s",s[i]);
+//
+//    }
+//    sx = 4;
+//    sy = m;
+//    sx--;
+//    sy--;
+//    debug(go(0,0));
+//    sx = 0;
+//    sy = m-1;
+//    debug(go1(n-1,0));
+
     int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    int k = nxt();
+   if(k%2==0) {
+        int t = k/2;
+        for(int i = 1;i<=t;i++) {
+            s[1][i]='*';
+            s[2][i]='*';
+        }
+    } else if(k%2){
+        int mid = n/2;
+        s[1][mid] = '*';
+        int i = mid;
+        i--;
+        int j = i+2;
+        k--;
+        while(k>0) {
+            s[1][i]=s[1][j]='*';
+            i--;
+            j++;
+            k-=2;
+            if(i<1) break;
+        }
+        i = mid;
+        i--;
+        j= i+2;
+        while(k>0) {
+            s[2][i]=s[2][j]='*';
+            i--;
+            j++;
+            k-=2;
+        }
 
-        printf("%lld\n",ans);
+    } else {
+        printf("NO\n");
+        return 0;
     }
-
-
+    printf("YES\n");
+    for(int i =0;i<4;i++) {
+        for(int j =0;j<n;j++){
+            if(s[i][j]=='*') printf("#");
+            else printf(".");
+        }
+        printf("\n");
+    }
 
     return 0;
 }

@@ -46,31 +46,7 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+int ar[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,24 +54,58 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
 
-        printf("%lld\n",ans);
-    }
 
+    int test = nxt();
+    int cs = 0;
+    while(test--) {
+        int x,y;
+        vector<pii > v;
+        int m = nxt();
+        int id = 0;
+        if(cs) printf("\n"); cs =1;
+        while(1) {
+            x = nxt();
+            y = nxt();
+            if(!x&&!y) break;
+            if(y<x) swap(x,y);
+            if(x<0&&y<0) continue;
+            if(x>m) continue;
+            v.pb(make_pair(x,y));
+
+        }
+        sort(ALL(v));
+        vector<pii> ans;
+        int last = 0;
+        int i = 0;
+        while(i<v.size()) {
+            int mx = 0;
+            int nx=-1,ny=-1 ;
+            if(v[i].ff<=last){
+                while(i<v.size()&&v[i].ff<=last) {
+                   if(v[i].ss>=mx) {
+                    nx = v[i].ff;
+                    ny = v[i].ss;
+                    mx = v[i].ss;
+                   }
+                   i++;
+                }
+                if(mx>last) {
+                    ans.pb(make_pair(nx,ny));
+                    last = mx;
+                    if(last>=m) break;
+                }
+            } else i++;
+        }
+        if(last<m){
+            printf("0\n");
+        } else {
+            printf("%d\n",(int)ans.size());
+            for(int i = 0;i<ans.size();i++) {
+                printf("%d %d\n",ans[i].ff,ans[i].ss);
+            }
+        }
+    }
 
 
     return 0;

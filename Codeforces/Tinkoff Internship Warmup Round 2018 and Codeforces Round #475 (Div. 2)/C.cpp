@@ -7,7 +7,7 @@
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
 #define        N                               200010
-#define        M                               1000000007
+#define        M                               (ll)1000000009
 #define        pi                              acos(-1.0)
 #define        ff                              first
 #define        ss                              second
@@ -26,7 +26,9 @@ template <typename T> string NumberToString ( T Number ) { ostringstream ss; ss 
 inline int nxt(){int aaa;scanf("%d",&aaa);return aaa;}
 inline ll lxt(){ll aaa;scanf("%lld",&aaa);return aaa;}
 inline double dxt(){double aaa;scanf("%lf",&aaa);return aaa;}
-template <class T> inline T bigmod(T p,T e,T m){T ret = 1;
+template <class T> inline T bigmod(T p,T e,T m){
+    if(p==0&&e) return 0;
+    T ret = 1;
 for(; e > 0; e >>= 1){
     if(e & 1) ret = (ret * p) % m;p = (p * p) % m;
 } return (T)ret;}
@@ -46,31 +48,8 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+int ar[N];
+char s[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,23 +57,42 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    ll n= lxt();
+    ll a = lxt();
+    ll b= lxt();
+    ll k = lxt();
+    scanf("%s",s);
+    ll ans =0;
+    ll term = (n+1)/k;
+    ll inv =bigmod((ll)a,(ll)k,M);
+    inv = bigmod(inv,M-2,M);
+    inv*= bigmod(b,k,M);
+    inv%=M;
+    ll up = bigmod(inv,term-1,M)-1;
+    up%=M;
+    if(up<0) up +=M;
+    ll down= inv-1;
+    down%=M;
+    if(down<0) down +=M;
+    down= bigmod(down,M-2,M);
+    inv = inv*up;
+    inv%=M;
+    inv*=down;
+    inv%=M;
+    for(int i = 0;i<k;i++){
+        ll tmp = bigmod((ll)a,(ll)n-i,(ll)M);
+        tmp*=bigmod((ll)b,(ll)i,(ll)M);
+        tmp%=M;
+        tmp+=(tmp*inv);
+        tmp%=M;
+        if(s[i]=='-') ans-=tmp;
+        else ans+=tmp;
+        ans%=M;
+        if(ans<0) ans+=M;
 
-        printf("%lld\n",ans);
     }
+    cout<<ans<<endl;
+
 
 
 

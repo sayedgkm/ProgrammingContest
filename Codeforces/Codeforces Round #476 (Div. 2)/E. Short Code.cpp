@@ -46,30 +46,38 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
+int ar[N];
+string s[N];
 
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+class node{
+public:
+	bool endmark;
+	node *ar[27];
+	node(){
+		endmark = false;
+		for (int i = 0; i < 27; i++) ar[i] = NULL;
     }
+};
+node *root;
+int Insert(string &word){
+
+	int len = word.length();
+	node *current =root;
+	for (int i = 0; i < len; i++){
+		int ascii = word[i] - 'a';
+        if (current->ar[ascii] == NULL)
+            current->ar[ascii] = new node();
+            current= current->ar[ascii];
+        if(current->endmark==false) {
+            current->endmark = true;
+            return i+1;
+        }
+   }
+}
+vector<string> group[N];
+vector<int> v;
+bool cmp(int a,int b) {
+    return group[a].size()>group[b].size();
 }
 int main(){
     #ifdef sayed
@@ -78,25 +86,36 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    root =  new node();
+    int  n= nxt();
+    for(int i =0;i<n;i++) cin>>s[i];
+    sort(s,s+n);
+    int i = 0;
+    int g = 0;
+    while(i<n) {
+        group[g].pb(s[i]);
+        int j = i+1;
+        while(j<n){
+            if(s[j].size()>s[j-1].size()&&s[j].substr(0,s[j-1].length())==s[j-1]) {
+                group[g].pb(s[j]);
+            } else break;
+            j++;
+        }
+
+        g++;i=j;
+
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
+    for(int i = 0;i<g;i++) {
+        v.pb(i);
     }
-
-
+    sort(ALL(v),cmp);
+    int ans = 0;
+    for(int i = 0;i<v.size();i++) {
+        for(int j = 0;j<group[v[i]].size();j++){
+            ans+=Insert(group[v[i]][j]);
+        }
+    }
+    cout<<ans<<endl;
 
     return 0;
 }

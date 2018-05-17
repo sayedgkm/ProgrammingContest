@@ -46,30 +46,88 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
+#define gray 1
+#define white 0
+#define black 2
+vector<int> adj[N]; int counter=1;
+int disc[N],low[N]; ///disc[N] is discovery time;
+vector<int> st;
+int visited[N];
+int cycle[N];
+ll ar[N];
+ll ans[N];
+void tarjan(int u){
+        disc[u]=low[u]=counter++;
+        visited[u]=gray;
+        st.pb(u);
+        for(int i=0;i<adj[u].size();i++){
+                int v=adj[u][i];
+            if(visited[v]==white)
+                   tarjan(v);
+          if(visited[v]==gray)   ///Back edge means gray to gray..so cycle found
+                  low[u]=min(low[u],low[v]);
+             }
+             if(low[u]==disc[u]){
+                ll sum = 0;
+                while(1){
+                    int x=st.back();
+                    st.pop_back();
+                    visited[x]=black;
+                    cycle[x]=u;
+                    sum+=ar[x];
+                  //  printf("%d ",x);
+                    if(x==u) break;
+                }
+                //printf("\n");
+                ans[u] = sum;
 
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
+
+}
+vector<int> dag[N];
+map<pii,int> mp;
+void shrink(int node){
+   for(int i=0;i<node;i++){
+         for(int j=0;j<adj[i].size();j++){
+            int t=adj[i][j];
+            if(cycle[i]!=cycle[t]){
+                dag[cycle[i]].pb(cycle[t]);
+            }
+
+         }
+
+   }
+
+}
+void createDag(int n){
+      counter=1; st.clear();
+      for(int i=0;i<=n;i++){
+         disc[i]=low[i]=visited[i]=cycle[i]=0;
+         dag[i].clear();
+      }
+       for(int i=0;i<n;i++){
+          if(!visited[i]) tarjan(i);
+       } shrink(n);
+}
+void printdag(int u){
+
+   for(int i=0;i<dag[u].size();i++){
+        int v=dag[u][i];
+        printf("%d %d\n",u,v);
+        printdag(v);
+   }
+}
+
+ll dp[N];
+ll go(int u) {
+    if(visited[u]==2) return dp[u];
+    ll res = ans[u];
+
+    ll tmp = 0;
+    for(auto it : dag[u])
+        tmp=max(tmp,go(it));
+    visited[u] = 2;
+    return dp[u] = res+tmp;
 }
 int main(){
     #ifdef sayed
@@ -78,24 +136,29 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int n = nxt();
+    int m = nxt();
+    for(int i =0;i<n;i++) ar[i] = lxt();
+    for(int i =0;i<m;i++) {
+        int a= nxt();
+        int b = nxt();
+        a--,b--;
+        adj[a].pb(b);
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
+    createDag(n);
+   // printdag(0);
+    CLR(visited);
+    for(int i = 0;i<n;i++) {
+        if(visited[i]==0) {
+            go(i);
+        }
     }
-
+    //for(int i = 0;i<n;i++) debug(dp[i]);
+    for(int i= 0;i<n;i++) {
+        if(i) printf(" ");
+        printf("%lld",dp[cycle[i]]);
+    }
+    printf("\n");
 
 
     return 0;

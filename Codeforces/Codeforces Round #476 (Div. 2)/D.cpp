@@ -46,30 +46,30 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+int ar[N];
+void go(int mid,int n,int l) {
+    int cur = 0;
+    vector<int> v(n+1);
+    for(int i = 1;i<=l;i++) {
+        v[i] = ar[i];
     }
+    int i = 1;
+    int j = l+1;
+    while(j<n){
+        while(i<j&&(j-i)>l) i++;
+        debug(i,j);
+        while(i<j&&v[j]<ar[j]) {
+            int mn = min(ar[j]-v[j],v[i]);
+            v[i]-=mn;
+            v[j]+=mn;
+            if(v[i]==0) i++;
+        }
+        debug(i,j,v[j]);
+        j++;
+    }
+    ll sum = 0;
+    for(int i = 1;i<=l;i++) sum+=v[n-i];
+    cout<<sum<<endl;
 }
 int main(){
     #ifdef sayed
@@ -78,25 +78,9 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
-
+    int n = nxt(); int l = nxt();
+    for(int i = 1;i<n;i++) ar[i] = nxt();
+    go(1e9+10,n,l);
 
     return 0;
 }

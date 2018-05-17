@@ -46,29 +46,82 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
+vector<int> adj[N],bt[N];
+int disc[N],low[N],color[N],visited[N];
+int counter=1;
+int cycle[N];
+multiset<pii> B;
+void Bridge(int s,int p) {
+    disc[s]=low[s]=counter++;
+    color[s]=1;
+    for(int i=0; i<adj[s].size(); i++) {
+        int t=adj[s][i];
+        if(t==p)
+            continue;
+        if(!color[t]) {
+            Bridge(t,s);
+            if(disc[s]<low[t]){
+                int x = min(s,t);
+                int y = max(s,t);
+                B.insert(make_pair(x,y));
+            }
 
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
+            low[s]=min(low[s],low[t]);
+        } else               ///Back Edge
+            low[s]=min(low[s],disc[t]);
+
+    }
+
 }
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
+int root; /// root of every component
+void dfs(int u) {
+    visited[u]  = 1;
+    cycle[u] = root;
 
+    for(int i  = 0;i<adj[u].size();i++) {
+        int v = adj[u][i];
+        int x = min(u,v);
+        int y = max(u,v);
+        if(B.find(make_pair(x,y))!=B.end()) continue;
+        if(!visited[v]) {
+            dfs(v);
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+    }
+}
+int make_tree(int n) {
+    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
+    B.clear();
+    counter = 1;
+    for(int i =0;i<N;i++) bt[i].clear();
+    for(int i =0;i<n;i++){
+        if(!color[i]) Bridge(i,-1);
+    }
+    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
+    for(int i =0;i<n;i++) {
+        for(int j = 0;j<adj[i].size();j++) {
+            int v = adj[i][j];
+            if(cycle[i]!=cycle[v]) {
+                bt[cycle[i]].pb(cycle[v]);
+            }
+        }
+    }
+}
+void print_bt(int n) {
+    for(int i =0;i<n;i++) {
+        for(int j =0;j<bt[i].size();j++) {
+            printf("%d %d\n",i+1,bt[i][j]+1);
+        }
+    }
+}
+int level[N];
+int tot = 0;
+void dfs(int u,int d,int p=-1) {
+    level[u] = d;
+    for(int i= 0;i<bt[u].size();i++) {
+        int v = bt[u][i];
+        if(p==v) continue;
+        tot++;
+        dfs(v,d+1,u);
     }
 }
 int main(){
@@ -78,24 +131,34 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    int test = nxt();
+    while(test--) {
+        int n = nxt();
+        int m =nxt();
+        for(int i = 0;i<m;i++) {
+            int a= nxt()-1;
+            int b= nxt()-1;
+            adj[a].pb(b);
+            adj[b].pb(a);
+        }
+        make_tree(n);
+        print_bt(n);
+        tot = 0;
+        CLR(level);
+        dfs(0,0);
+        int mx = 0;int node = -1;
+        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]],node =cycle[i];
+        CLR(level);
+        tot =0;
+        mx =0;
+        dfs(node,0);
+        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]];
+        //debug(mx,tot,node);
+        printf("%d\n",tot-mx);
+        for(int i =0;i<n;i++) adj[i].clear();
 
-        printf("%lld\n",ans);
-    }
 
+    }
 
 
     return 0;

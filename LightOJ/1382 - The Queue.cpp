@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               200010
+#define        N                               1010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,29 +46,33 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
+int in[N];
+ll dp[N];
+ll ncr[N][N];
+int sz[N];
+vector<int> adj[N];
+void dfs(int u,int p = -1) {
+    sz[u] = dp[u] = 1LL;
+    for(int i = 0;i<adj[u].size();i++) {
+        int v =adj[u][i];
+        if(v==p) continue;
+        dfs(v,u);
+        sz[u]+=sz[v];
 
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
+    }
+
 }
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+void go(int u,int p=-1) {
+    int s = 0;
+    for(int i =0;i<adj[u].size();i++) {
+        int v = adj[u][i];
+        if(v==p) continue;
+        go(v,u);
+        int n = sz[u]-s-1;
+        int r = sz[v];
+        dp[u]*=(ncr[n][r]*dp[v])%M;
+        dp[u]%=M;
+        s+=sz[v];
     }
 }
 int main(){
@@ -78,25 +82,38 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    ncr[0][0] =1;
+    for(int i =1;i<N;i++) {
+        ncr[i][0]= ncr[i][i] = 1;
+        for(int j = 1;j<i;j++) {
+            ncr[i][j]= ncr[i-1][j]+ncr[i-1][j-1];
+            ncr[i][j]%=M;
+        }
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
+    int test =nxt();
+    int cs = 1;
+    while(test--) {
+        int n= nxt();
+        for(int i = 1;i<n;i++) {
+            int a= nxt();
+            int b = nxt();
+            adj[a].pb(b);
+            adj[b].pb(a);
+            in[b]++;
+        }
+        int root = -1;
+        for(int i = 1;i<=n;i++) if(!in[i]) {
+            root = i;
+            break;
+        }
+        dfs(root);
+        go(root);
+        printf("Case %d: %lld\n",cs++,dp[root]);
+        CLR(in);
+        CLR(dp);
+        CLR(sz);
+        for(int i= 0;i<=n;i++) adj[i].clear();
     }
-
-
 
     return 0;
 }

@@ -46,31 +46,9 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+int T[55][55];
+ll cost[55][55];
+ll dp[55][1005];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,24 +56,33 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    while(true){
+        int  n = nxt();
+        int t= nxt(); if(!n&&!t) break;
+        for(int i = 0;i<n;i++) for(int j = 0;j<n;j++) T[i][j] = nxt();
+        for(int i = 0;i<n;i++) for(int j = 0;j<n;j++) cost[i][j] = lxt();
+        for(int i = 0;i<55;i++) for(int j = 0;j<1005;j++) dp[i][j] = (ll)3e17;
+        for(int i = 0;i<=t;i++) dp[0][i] = 0;
+        int tmp =  n;
+        while(tmp--)
+        for(int i = 0;i<n;i++){
+            for(int j = 0;j<n;j++) {
+                for(int k = 0;k<=t;k++) {
+                    if(k+T[i][j]<=t)
+                    dp[j][k+T[i][j]] = min(dp[j][k+T[i][j]],dp[i][k]+cost[i][j]);
+                }
+            }
+        }
+        ll ans = (ll)3e17;
+        for(int i = 0;i<=t;i++) ans = min(ans,dp[n-1][i]);
+        for(int i = 0;i<=t;i++) {
+            if(dp[n-1][i]==ans) {
+                cout<<ans<<" "<<i<<endl;
+                break;
+            }
+        }
 
-        printf("%lld\n",ans);
     }
-
 
 
     return 0;

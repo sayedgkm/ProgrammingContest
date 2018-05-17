@@ -46,30 +46,31 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
+int mat[17][17];
+int degree[17];
+int dp[(1<<16)+10];
+void  reset(int n){
+   FOR(i,1,n+1) FOR(j,1,n+1) mat[i][j]=inf;
+ }
+void warshall(int n){
+   FOR(k,1,n+1) FOR(i,1,n+1) FOR(j,1,n+1)
+       if(mat[i][k]+mat[k][j]<mat[i][j]) mat[i][j]=mat[i][k]+mat[k][j];
 }
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
+int n;
+int go(int st) {
+    if(st==0) return 0;
+    int &res = dp[st];
+    if(res!=-1) return res;
+    res = inf;
+    int s =0;
+    for(int i = 1;i<=n;i++) if(ison(st,i)){s = i;break;}
+    for(int i = 1;i<=n;i++) {
+        if(i==s) continue;
+        if(ison(st,i)) {
+            res = min(res,go(bitoff(bitoff(st,i),s))+mat[s][i]);
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
     }
+    return res;
 }
 int main(){
     #ifdef sayed
@@ -78,25 +79,26 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int test = nxt(); int cs = 1;
+    while(test--) {
+        n = nxt();
+        int m = nxt();
+        CLR(degree);SET(dp);
+        reset(n);int ans = 0;
+        for(int i = 0;i<m;i++) {
+            int a= nxt();int b = nxt();
+            int cost =nxt();
+            ans+=cost;
+            degree[a]++,degree[b]++;
+            mat[a][b] = min(mat[a][b],cost);
+            mat[b][a] = min(mat[b][a],cost);
+        }
+        warshall(n);
+        int st = 0;
+        for(int i = 1;i<=n;i++)  if(degree[i]%2) st = biton(st,i);
+        ans+=go(st);
+        printf("Case %d: %d\n",cs++,ans);
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
-
 
     return 0;
 }

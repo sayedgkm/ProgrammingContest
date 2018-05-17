@@ -46,31 +46,7 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+int ar[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,25 +54,28 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int test =  nxt();
+    while(test--) {
+        int n = nxt();
+        ll sum = 0;
+        int c= 0;
+        for(int i = 0;i<n;i++) {
+            ar[i] = lxt();
+            if(sum>=ar[i]){
+                for(int j = i-1;j>=0;j--) {
+                    if(ar[j]<0) continue;
+                    sum-=ar[j];
+                    ar[j] = -1;
+                    c--;
+                    if(sum<ar[i]) break;
+                }
+            }
+            sum+=ar[i];
+            c++;
+
+        }
+        printf("%d\n",c);
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
-
 
     return 0;
 }

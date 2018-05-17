@@ -46,31 +46,43 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+class info{
+    public:
+    vector<int> tree;
+    void init(int n) {
+        tree.resize(4*n);
     }
-}
+    void update(int node,int low,int hi,int i,int value){
+
+       if(low==hi){
+        tree[node]=max(tree[node],value); return;
+       }
+       int mid=(low+hi)/2;
+       int left=2*node;
+       int right=left+1;
+       if(i<=mid)
+          update(left,low,mid,i,value);
+       else
+          update(right,mid+1,hi,i,value);
+       tree[node]=max(tree[left],tree[right]);
+    }
+    ll query(int node,int low,int hi,int i,int j){
+        if(i>hi||j<low) return 0;
+        if(low>=i&&hi<=j)
+          return tree[node];
+        int mid=(low+hi)/2;
+        int left=2*node;
+        int right=left+1;
+        return max(query(left,low,mid,i,j),
+       query(right,mid+1,hi,i,j));
+
+    }
+};
+int ar[N];
+vector<info> all;
+vector<pair<pair<int,int>,int> > edge;
+map<pii,int> mp;
+map<pii,int> :: iterator it;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,25 +90,55 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+
+    int n =nxt();
+    int m = nxt();
+    all.resize(n+1);
+    for(int i = 0;i<m;i++) {
+        int a= nxt();
+        int b = nxt();
+        int c = nxt();
+        mp[pii(a,c)] = 0;
+        mp[pii(b,c)] = 0;
+        edge.pb(make_pair(make_pair(a,b),c));
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    int prev=-1;
+    int cnt = 1;
+    for(it = mp.begin();it!=mp.end();it++) {
+        int val = (it->ff).ff;
+        if(val!=prev) {
+            cnt = 1;
+            mp[it->ff] = cnt;
+        } else {
+            mp[it->ff] = cnt;
+        }
+        prev = val;
+        cnt++;
 
-        printf("%lld\n",ans);
+    }
+    for(it = mp.begin();it!=mp.end();it++) {
+        int val = (it->ff).ff;
+        ar[val] = max(it->ss,ar[val]);
+    }
+    all.resize(100001);
+    for(int i = 1;i<=100000;i++) {
+        if(ar[i]) {
+            all[i].init(ar[i]+5);
+        }
     }
 
-
-
+    int ans = 0;
+    for(int i = edge.size()-1;i>=0;i--) {
+        int a= edge[i].ff.ff;
+        int b = edge[i].ff.ss;
+        int c = edge[i].ss;
+        int id = mp[make_pair(a,c)];
+        int id1 = mp[make_pair(b,c)];
+        int val= all[b].query(1,1,ar[b],id1+1,ar[b]);
+        ans= max(ans,val+1);
+        val+=1;
+        all[a].update(1,1,ar[a],id,val);
+    }
+    cout<<ans<<endl;
     return 0;
 }

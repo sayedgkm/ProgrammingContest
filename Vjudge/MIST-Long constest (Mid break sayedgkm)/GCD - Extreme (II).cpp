@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               200010
+#define        N                               4000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,29 +46,20 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
+ll ar[N];
+ll sum[N];
+ll unsigned phi[N+ 5];
+void sieveofphi(int n) {
+    phi[1] = 1;
+    for (int i = 2; i <= n; i++) {
+        if (!phi[i]) {  /// i is a prime
+            phi[i] = i - 1;
+            for (int j = i * 2; j <= n; j += i) {
+                if (!phi[j]) phi[j] = j;
+                phi[j] /= i;
+                phi[j] *= i - 1;
+            }
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
     }
 }
 int main(){
@@ -78,25 +69,18 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    sieveofphi(N-1);
+    for(int i =1;i<N;i++) {
+        for(int j = i+i;j<N;j+=i) {
+           ar[j]+=i*phi[j/i];
+        }
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
+    for(int i =1;i<N;i++) ar[i]+=ar[i-1];
+    while(1) {
+        int n= nxt();
+        if(!n) break;
+        printf("%lld\n",ar[n]);
     }
-
-
 
     return 0;
 }

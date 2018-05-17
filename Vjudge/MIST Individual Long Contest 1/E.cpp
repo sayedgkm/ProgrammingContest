@@ -46,30 +46,44 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+int ar[20][20];
+struct info{
+    int v,c,t;
+    info(int _v,int _c,int _t): v(_v),c(_c),t(_t){}
+};
+struct info1{
+    ll cost,cur,city;
+    info1(ll _cost,ll _cur,ll _city):cost(_cost),cur(_cur),city(_city){}
+    bool operator<(const info1& other ) const {
+        return cost>other.cost;
     }
+};
+vector<info> adj[N];
+ll level[N][12];
+void dj(int st) {
+    priority_queue<info1> pq;
+    pq.push(info1(0,st,0));
+    for(int i = 0;i<N;i++) for(int j =0;j<12;j++) level[i][j] = (ll) 3e17;
+    level[st][0] = 0;
+    while(!pq.empty()) {
+
+        info1 top = pq.top();
+        int u = top.cur;
+        int c1 =top.city;
+        pq.pop();
+        for(int i = 0;i<adj[u].size();i++) {
+            int v = adj[u][i].v;
+            ll cost = adj[u][i].c;
+            int c2 =adj[u][i].t;
+            debug(level[u][c1],c1,level[v][c2],u,v);
+            if(level[u][c1]+cost+ar[c1][c2]<level[v][c2]){
+                level[v][c2] = level[u][c1]+cost+ar[c1][c2];
+                pq.push(info1(level[v][c2],v,c2));
+            }
+        }
+
+    }
+
 }
 int main(){
     #ifdef sayed
@@ -78,25 +92,32 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int n = nxt();
+    int m = nxt();
+    int t = nxt();
+    int st = nxt();
+    for(int i = 1;i<=t;i++) for(int j = 1;j<=t;j++) {
+
+        ar[i][j] = nxt();
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
+    for(int i = 0;i<m;i++) {
+        int a= nxt();
+        int b= nxt(),c = nxt(),T = nxt();
+        adj[a].pb(info(b,c,T));
+        adj[b].pb(info(a,c,T));
     }
-
-
+    dj(st);
+    for(int i = 1;i<=n;i++) {
+        ll ans = (ll)3e17;
+        for(int j = 0;j<=10;j++){
+            ans = min(ans,level[i][j]);
+        }
+        if(i>1) printf(" ");
+        if(ans == (ll)3e17) {
+            printf("-1");
+        } else printf("%lld",ans);
+    }
+    printf("\n");
 
     return 0;
 }

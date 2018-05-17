@@ -46,30 +46,26 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
+int ar[N];
+vector<int> adj[1005];
+int bfs(int st) {
+    int level[1004]={0};
+    queue<int> q;
+    q.push(st);
+    level[st] =1;
+    int val = 0;
+    while(!q.empty()) {
+        int u = q.front();
+        q.pop();
+        for(auto v: adj[u]) {
+            if(level[v]) continue;
+            level[v]= level[u]+1;
+            if(ar[v]&1) val^=(level[v]-1);
+            q.push(v);
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+
     }
+    return val;
 }
 int main(){
     #ifdef sayed
@@ -78,24 +74,24 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int test = nxt();
+    int cs = 1;
+    while(test--) {
+        int n = nxt();
+        FOR(i,1,n+1) ar[i] = nxt();
+        for(int i = 0;i<n-1;i++){
+            int a= nxt();
+            int b= nxt();
+            adj[a].pb(b);
+            adj[b].pb(a);
+        }
+        int cnt = 0;
+        for(int i = 1;i<=n;i++) {
+            if(!bfs(i)) cnt++;
+        }
+        printf("Case %d: %d\n",cs++,cnt);
+        FOR(i,0,n+1) adj[i].clear();
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
 
 
     return 0;

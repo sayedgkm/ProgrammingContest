@@ -46,29 +46,54 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
+vector<int> adj[N];
+int disc[N],low[N],color[N];
+int vis[N];int cnt = 0;
+int counter=1;
+int root;
 
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
+int odd[N];
+void init(){
+    counter =1 ;
+    for(int i = 0;i<N;i++) {
+        adj[i].clear();
+        disc[i] = low[i]= color[i]= vis[i]  = odd[i]=0;
+    }
 }
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
+stack<int>st;
+ll ans = 0;
+int dfs(int u,int p = -1) {
+    vis[u] = 1;
+    disc[u] = low[u] = counter++;
+    st.push(u);
+    for(int i =0;i<adj[u].size();i++) {
+        int  v= adj[u][i];
+        if(v==p)continue;
+        if(vis[v]==0) {
+            if(color[u]==1) color[v] = 2;
+            else color[v] = 1;
+            dfs(v,u);
+            low[u]= min(low[v],low[u]);
+        } else {
+            low[u] = min(low[v],low[u]);
 
+            if(color[u]==color[v]) odd[u] = odd[v] = 1;
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+    }
+
+    if(disc[u]==low[u]) {
+        set<int> ok ;
+        int x  = -1;
+        int f = 0;
+        while(u!=x) {
+            x = st.top();
+
+            st.pop();
+            if(odd[x]==1) f = 1;
+            ok.insert(x);
+        }
+
+        if(f) ans+=ok.size();
     }
 }
 int main(){
@@ -78,23 +103,21 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+   int test = nxt();int cs = 1;
+   while(test--) {
+        int n= nxt();
+        int m = nxt();
+        for(int i =0;i<m;i++){
+            int a= nxt();
+            int b= nxt();adj[a].pb(b);
+            adj[b].pb(a);
+        }
+        ans = 0;
+        for(int i = 0;i<n;i++) if(!vis[i]) color[i]=1,dfs(i);
+        printf("Case %d: %lld\n",cs++,ans);
+        init();
 
-        printf("%lld\n",ans);
-    }
+   }
 
 
 

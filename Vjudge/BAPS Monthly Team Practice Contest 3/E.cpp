@@ -46,31 +46,33 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
+const long long MOD[] = {1000000007LL, 2117566807LL,1000000007LL,1000000037LL};
+const long long BASE[] = {1572872831LL, 1971536491LL,1000003LL,31};
+class stringhash{
+    public:
+    ll base,mod,len,ar[N],P[N];
 
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+   void GenerateFH(string s,ll b,ll m){
+          base=b;
+          mod=m;  len=s.length();
+          P[0]=1; long long h=0;
+          for(int i=1;i<=len;i++) P[i]=((ll)P[i-1]*(ll)base)%mod;
+          for(int i=0;i<len;i++){
+              h=(h*base)+s[i];
+              h%=mod;
+              ar[i]=h;
+          }
+   }
+   int Fhash(int x,int y){
+        ll h=ar[y];
+       if(x>0){
+         h=(h-(ll)P[y-x+1]*(ll)ar[x-1])%mod;
+         if(h<0) h+=mod;
+       }
+       return h;
+   }
+};
+stringhash s1,s2;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,25 +80,11 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
-
+    int n;
+    int m;
+    cin>>n>>m;
+    string s;
+    cin>>s;
 
     return 0;
 }

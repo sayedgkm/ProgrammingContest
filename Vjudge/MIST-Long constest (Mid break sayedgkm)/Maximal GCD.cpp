@@ -46,30 +46,32 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
+int ar[N];
+bool ispossible(ll gc,ll k,ll n) {
+    if(k>1e6) return false;
+    ll tmpk = k-1;
+    tmpk = (tmpk*tmpk+tmpk)/2LL;
+    if(tmpk>n) return false;
+    tmpk= tmpk*gc;
+    if(tmpk>n) return false;
+    ll extra= n-tmpk;
+    if(extra<=gc*(k-1)) return false;
+    if(extra%gc==0&&extra) return true;
+    return false;
 }
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+void print(ll gc,ll k,ll n){
+    ll sum = 0;
+    ll tmp = gc;
+    vector<ll> v;
+    for(int i= 0;i<k-1;i++) {
+        v.pb(tmp);
+        sum+=tmp;
+        tmp+=gc;
     }
+    v.pb(n-sum);
+    sort(ALL(v));
+    for(auto it : v) printf("%lld ",it);
+    printf("\n");
 }
 int main(){
     #ifdef sayed
@@ -78,25 +80,24 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    ll n= lxt();
+    ll k=lxt();
+    ll sq = sqrt(n);
+    ll ans = 0;
+    for(ll i = 1;i<=sq;i++) {
+        if(n%i) continue;
+        if(ispossible(i,k,n)) {
+            ans = max(ans,i);
+        }
+         if(ispossible(n/i,k,n)) {
+            ans = max(ans,n/i);
+        }
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
+    if(ans==0){
+        cout<<-1<<endl;
+        return 0;
     }
-
-
+    print(ans,k,n);
 
     return 0;
 }

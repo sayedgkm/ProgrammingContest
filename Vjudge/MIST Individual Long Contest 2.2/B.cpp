@@ -46,30 +46,36 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
+map<pii,int> mp;
+vector<int> adj[N];
+vector<int> euler_cycle; /// 0 based node
+void find_cycle(int u) {
 
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+    for(int i = 0;i<adj[u].size();i++) {
+        int it = adj[u][i];
+        if(mp[make_pair(u,it)]==0) continue;
+        mp[make_pair(u,it)]--;
+        mp[make_pair(it,u)]--;  ///for bi-directional
+        find_cycle(it);
     }
+    euler_cycle.pb(u);
+
+}
+int degree[N];
+bool is_euler_cycle(int n) {
+    for(int i =0;i<n;i++) {
+        if(degree[i]%2) return false;
+    }
+    return true;
+}
+bool is_euler_path(int n) {
+    int odd = 0;
+    int even = 0;
+    for(int i =0;i<n;i++){
+        if(degree[i]%2==0) even++;
+        else odd++;
+    }
+    return odd==2;
 }
 int main(){
     #ifdef sayed
@@ -78,24 +84,39 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
 
-        printf("%lld\n",ans);
-    }
+    int cs = 1;
+    int test = nxt();
+    while(test--) {
+        int n = nxt();
+        int  m = nxt();
+        ll sum = 0;
+        for(int i = 0;i<n;i++) sum+=lxt();
+        sum-=(n*n+n)/2;
+        sum-=m;
+        printf("Case %d: %lld\n",cs++,sum);
+        for(int i = 0;i<m;i++) {
+            int a = nxt();
+            int b = nxt();
+            a--;
+            b--;
+            mp[make_pair(a,b)]++;
+            adj[a].pb(b);
+            mp[make_pair(b,a)]++;
+            adj[b].pb(a);
+        }
+        find_cycle(0);
+        reverse(ALL(euler_cycle));
+        for(int i = 0;i<euler_cycle.size();i++) {
+            if(i) printf(" ");
+            printf("%d",euler_cycle[i]+1);
+        }
+        printf("\n");
+        mp.clear();
+        euler_cycle.clear();
+        for(int i = 0;i<n;i++) adj[i].clear();
 
+    }
 
 
     return 0;

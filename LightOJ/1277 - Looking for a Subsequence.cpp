@@ -46,56 +46,57 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+int ar[N];
+int f[N];
+int q[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
-    // freopen("in.txt","r",stdin);
+    //freopen("in.txt","r",stdin);
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int test = nxt();
+    int cs = 1;
+    while(test--) {
+        int n = nxt(); int Q = nxt();
+        for(int i = 0;i<n;i++) {
+            ar[i] = nxt();
+        }
+        int last = 0;
+        for(int i = n-1;i>=0;i--) {
+            int lo= lower_bound(q,q+last,-ar[i])-q;
+            last = max(last,lo+1);
+            q[lo] = -ar[i];
+            f[i]= lo+1;
+        }
+        printf("Case %d:\n",cs++);
+        while(Q--) {
+            int  t = nxt();
+            vector<int> ans;
+            int val = -inf;
+            if(t<=last){
+                int i = 0;
+                while(t>0&&i<n) {
+                    if(f[i]>=t&&ar[i]>val) {
+                        ans.pb(ar[i]);
+                        t--;
+                        val = ar[i];
+                    }
+                    i++;
+                }
+                for(int i = 0;i<ans.size();i++) {
+                    if(i) printf(" ");
+                    printf("%d",ans[i]);
+                }
+                printf("\n");
+            } else {
+                printf("Impossible\n");
+            }
+        }
+        CLR(q);
+        CLR(f);
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
 
 
     return 0;

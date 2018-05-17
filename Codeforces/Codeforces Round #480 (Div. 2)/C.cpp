@@ -46,31 +46,8 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+int ar[N];
+int mark[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,24 +55,35 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int n =  nxt();
+    int k = nxt();
+    for(int i= 0;i<n;i++)  ar[i] = nxt();
+    SET(mark);
+    vector<int> v;
+    for(int i = 0;i<n;i++) {
+        if(mark[ar[i]]!=-1) {
+            v.pb(mark[ar[i]]);
+        } else {
+            int le= -1;
+            for(int j= ar[i];j>=0;j--) {
+                if(mark[j]!=-1) {
+                    le = j;
+                    break;
+                }
+            }
+            if(ar[i]==3||ar[i]==4) debug(le);
+            if(le==-1||le<ar[i]-k+1) {
+                le= max(0,ar[i]-k+1);
+            } else {
+                if(ar[i]-k+1<=mark[le]) {
+                    le = mark[le];
+                } else le = le+1;
+            }
+            v.pb(le);
+            for(int j = le;j<=ar[i];j++) mark[j] = le;
+        }
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
+    for(auto it: v) printf("%d ",it);
 
 
     return 0;

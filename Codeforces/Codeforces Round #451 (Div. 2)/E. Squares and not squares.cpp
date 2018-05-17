@@ -46,31 +46,8 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+int ar[N];
+vector<int> sq,nsq;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,25 +55,54 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int n = nxt();
+    for(int i = 0;i<n;i++) {
+        int a= nxt();
+        int s= sqrt(a);
+        if(s*s==a) sq.pb(a);
+        else nsq.pb(a);
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+     ll sum = 0;
+    if(sq.size()<nsq.size()) {
+        vector<int> lol;
+        for(int i = 0;i<nsq.size();i++) {
+            int tmp = sqrt(nsq[i]);
+            lol.pb(min((tmp+1)*(tmp+1)-nsq[i],nsq[i]-(tmp*tmp)));
+        }
+        sort(ALL(lol));
+        reverse(ALL(lol));
+        int ssq = sq.size();
+        int snsq = nsq.size();
 
-        printf("%lld\n",ans);
+        while(ssq<snsq) {
+            sum+=lol.back();
+            lol.pop_back();
+            ssq++;
+            snsq--;
+        }
+
+
+    } else {
+        vector<int> lol;
+        for(int i = 0;i<sq.size();i++) {
+            if(sq[i]==0)
+                lol.pb(2);
+            else lol.pb(1);
+        }
+        sort(ALL(lol));
+        reverse(ALL(lol));
+        int ssq = sq.size();
+        int snsq = nsq.size();
+
+        while(ssq>snsq) {
+            sum+=lol.back();
+            lol.pop_back();
+            ssq--;
+            snsq++;
+        }
+
     }
-
-
+    cout<<sum<<endl;
 
     return 0;
 }

@@ -46,29 +46,24 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
+int ar[N];
+int cnt = 0;
+vector<int>adj[N];
+int color[N];
+bool f = 0;
+vector<int> v;
+int in[N];
+int out[N];
+void dfs(int u) {
+    v.pb(u);
+    color[u] =1 ;
+    cnt++;
+    for(int i = 0;i<adj[u].size();i++) {
 
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
+        if(!color[adj[u][i]]) {
 
+            dfs(adj[u][i]);
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
     }
 }
 int main(){
@@ -78,25 +73,40 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int  n= nxt();
+    int m = nxt();
+
+    for(int i = 0;i<m;i++) {
+        int a= nxt();
+        int b= nxt();
+        adj[a].pb(b);
+        adj[b].pb(a);
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    int ans = 0;
+    for(int i = 1;i<=n;i++) {
+        if(!color[i]) {
+            v.clear();
+            cnt = 0;
+            dfs(i);
 
-        printf("%lld\n",ans);
+            if(cnt>=3){
+                bool  f  = 0;
+                for(auto it : v) {
+                    for(int i = 0;i<adj[it].size();i++) {
+                        out[it]++;
+                        in[adj[it][i]]++;
+                    }
+                }
+                for(auto it : v) {
+                    if(!(in[it]==2&&out[it]==2)) f = 1;
+                }
+                if(f==0) ans++;
+            }
+            for(auto it: v) in[it]=out[it]=0;
+
+        }
     }
 
-
-
+    cout<<ans<<endl;
     return 0;
 }

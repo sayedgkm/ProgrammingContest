@@ -46,30 +46,20 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+int ar[N];
+void print(string s) {
+    int n = 0;
+    for(auto it : s) {
+        n*=10;
+        n+=(it-48);
     }
+    int mark[10]={0};
+    for(int i = 1;i<=n;i++) {
+        int t = i;
+        while(t) mark[t%10]++,t/=10;
+    }
+    for(int i = 0;i<=9;i++) printf("%d ",mark[i]);
+    printf("\n");
 }
 int main(){
     #ifdef sayed
@@ -78,24 +68,21 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    cout<<0%6<<endl;
+    string s ;
+    cin>>s;
+    print(s);
+    main();
+    if(s[0]==49){
+        cout<<1<<endl;
+    } else {
+        int maybe = s[0]-'0';
+        int f= 0;
+        for(int i = 0;i<s.length();i++){
+            if(s[i]<'9') f= 1;
+        }
+        cout<<maybe-f<<endl;
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
 
 
     return 0;

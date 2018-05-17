@@ -46,31 +46,9 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+ll ar[N],br[N];
+ll used[N];
+priority_queue<pll> pq;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,25 +56,47 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
+
     int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    ll a = lxt();
+    ll b =lxt();
+    ll sum = 0;
+    for(int i = 0;i<n;i++) {
+        ar[i] = lxt();
+        br[i] = lxt();
+        sum+=br[i];
+    }
+    for(int i = 0;i<n;i++) {
+        pq.push(make_pair(ar[i]-br[i],i));
+    }
+    ll ans = 0;
+    ll extra = 0;
+    ll picchi = -1;
+    while(b&&pq.size()) {
+        pll top = pq.top();
+        pq.pop();
+        if(top.ff>0){
+            extra+=top.ff;
+            used[top.ss]= 1;
+            picchi = top.ff;
+        } else break;
+        b--;
 
-        printf("%lld\n",ans);
     }
 
-
-
+    ll mx =sum+extra;
+    ll two = 1LL<<a;
+    for(int i = 0;i<n;i++){
+        if(used[i]) {
+            mx = max(mx,sum+extra-(ar[i]-br[i])-br[i]+ar[i]*two);
+        } else {
+            if(b>0&&ar[i]*two>=br[i]){
+                mx = max(mx,sum+extra-br[i]+ar[i]*two);
+            } else if(ar[i]*two>=br[i]&&picchi!=-1) {
+                mx = max(mx,sum+extra-br[i]+ar[i]*two-picchi);
+            }
+        }
+    }
+    cout<<mx<<endl;
     return 0;
 }

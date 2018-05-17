@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               200010
+#define        N                               100010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,31 +46,10 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+int ar[N];
+bitset<N> st[N];
+vector<int> v;
+int rep[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,24 +57,41 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
     int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
+    int k = nxt();
+    int q = nxt();
+    for(int i = 0;i<k;i++) {
+        int s = nxt();
+        s--;
+        int t = nxt();
+        rep[t] = 1;
+        while(s--) {
+            int a = nxt();
+            st[t].set(a,1);
+        }
     }
 
+    while(q--) {
+        int t= nxt();
+        v.clear();
+        bitset<N> ok;
+        for(int i = 0;i<t;i++) {
+            int a = nxt();
+            v.pb(a);
+            ok.set(a,1);
+        }
+
+        int cnt = 0;
+        for(int i = 0;i<v.size();i++) {
+            if(!rep[v[i]]) continue;
+           // debug(ar[i]);
+            ok.reset(v[i]);
+            if((st[v[i]]&ok)==st[v[i]]) cnt++;
+            ok.set(v[i],1);
+        }
+        printf("%d\n",cnt);
+
+    }
 
 
     return 0;

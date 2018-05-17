@@ -46,30 +46,33 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
+int ar[N];
+ll dp[50002][505];
+int k;
+vector<int> adj[N];
+void dfs(int u,int p = -1) {
+    dp[u][0] = 1;
+    for(auto it : adj[u]) {
+        if(it==p) continue;
+        dfs(it,u);
+        for(int i = 1;i<=k;i++) {
+            dp[u][i] +=dp[it][i-1];
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
     }
+}
+ll ans = 0;
+void dfs1(int u,int p = -1) {
+    ll res = 0;
+    for(auto it : adj[u]) {
+        if(it==p) continue;
+        dfs1(it,u);
+        for(int i = 0;i<k-1;i++) {
+            res+=dp[it][i]*(dp[u][k-i-1]-dp[it][k-i-2]);
+        }
+    }
+    res/=2;
+    ans+=res;
+    ans+=dp[u][k];
 }
 int main(){
     #ifdef sayed
@@ -78,24 +81,17 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int n = nxt();
+    k = nxt();
+    for(int i = 0;i<n-1;i++) {
+        int a= nxt();
+        int b= nxt();
+        adj[a].pb(b);
+        adj[b].pb(a);
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
+    dfs(1);
+    dfs1(1);
+    cout<<ans<<endl;
 
 
     return 0;

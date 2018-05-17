@@ -46,31 +46,22 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+int ar[N];
+int br[N];
+struct info{
+    ll a,b;
+    ll diff;
+    info (ll _a,ll _b,ll _diff) {
+        a =_a;
+        b= _b;
+        diff=_diff;
     }
-}
+    bool operator<(const info& other) const {
+        return diff<other.diff;
+    }
+
+};
+priority_queue<info> pq;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,25 +69,35 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
     int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
+    int k1 = nxt();
+    int k2 = nxt();
+    int k = k1+k2;
+    for(int i =0;i<n;i++) {
+        ar[i] = nxt();
     }
+    for(int i =0;i<n;i++){
+        br[i] = nxt();
+    }
+    for(int i =0;i<n;i++) {
+        pq.push(info((ll)ar[i],(ll)br[i],(ll)abs(ar[i]-br[i])));
+    }
+    while(k--) {
 
-
+        info tmp = pq.top();
+        pq.pop();
+        if(tmp.a<tmp.b) tmp.a++;
+        else tmp.a--;
+        tmp.diff= abs(tmp.a-tmp.b);
+        pq.push(tmp);
+    }
+    ll ans = 0;
+    while(pq.size()) {
+        info tmp = pq.top();
+        pq.pop();
+        ans+=tmp.diff*tmp.diff;
+    }
+    cout<<ans<<endl;
 
     return 0;
 }

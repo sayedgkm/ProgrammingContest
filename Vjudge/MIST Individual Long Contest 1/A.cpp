@@ -46,30 +46,42 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+int ar[N];
+vector<pll> adj[N];
+struct info {
+    ll cost ,cur;
+    info(ll _cost,ll _cur) {
+        cost = _cost;
+        cur = _cur;
     }
+    bool operator< (const info& other) const {
+        return cost>other.cost;
+    }
+};
+ll level[3][N];
+
+void dj(int s,int id) {
+
+    priority_queue<info> pq;
+    pq.push(info(0,s));
+    for(int i =0;i<N;i++)level[id][i] =(ll)3e17;
+    level[id][s] = 0;
+    while(!pq.empty()) {
+        info top= pq.top();
+        pq.pop();
+        int u = top.cur;
+        for(auto it : adj[u]) {
+            int vv = it.ff;
+            ll cost = it.ss;
+            if(level[id][u]+cost<level[id][vv]) {
+                level[id][vv] = level[id][u]+cost;
+                pq.push(info(level[id][vv],vv));
+            }
+        }
+
+    }
+
+
 }
 int main(){
     #ifdef sayed
@@ -78,25 +90,30 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    int test = nxt();
+    while(test--) {
 
+        int n = nxt();
+        int m = nxt();
+        int s =nxt();
+        int t= nxt();
+        int v= nxt();
+        for(int i =0;i<m;i++) {
+            int a= nxt();
+            int b= nxt();
+            ll c= lxt();
+            adj[a].pb(make_pair(b,c));
+            adj[b].pb(make_pair(a,c));
+        }
+        dj(s,0);
+        dj(t,1);
+        dj(v,2);
+        ll ans = (ll)3e17;
+        for(int i = 1;i<=n;i++)  ans = min({ans,level[0][i]+level[1][i]+level[2][i]});
         printf("%lld\n",ans);
+        for(int i = 0;i<N;i++) adj[i].clear();
+
     }
-
-
 
     return 0;
 }

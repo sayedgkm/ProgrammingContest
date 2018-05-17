@@ -46,29 +46,27 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
+int ar[N];
+ll n;
+map<pll,int> mp;
+ll go(ll no,int f) {
+   // debug(no,f);
+    if(no>=n){
+        if(f==0) return mp[make_pair(no,f)]=0;
+        return mp[make_pair(no,f)]=1;
+    }
+    if(mp.count(make_pair(no,f))) return mp[make_pair(no,f)];
+    if(f==0) {
+        for(ll i =2;i<=9;i++) {
+            if(go(no*i,1)) return mp[make_pair(no,f)]=1;
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+        return mp[make_pair(no,f)]=0;
+    } else {
+        for(ll i =2;i<=9;i++) {
+            if(go(no*i,0)==0) return mp[make_pair(no,f)]=0;
+        }
+        return mp[make_pair(no,f)]=1;
+
     }
 }
 int main(){
@@ -78,25 +76,11 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    while(cin>>n) {
+        mp.clear();
+        if(go(1,0)) cout<<"Stan wins."<<endl;
+        else cout<<"Ollie wins."<<endl;
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
-
 
     return 0;
 }

@@ -46,55 +46,35 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
+int ar[N];
+string s[N];
+bool cmp(int x,int y) {
+    return (int)s[x].length()<(int)s[y].length();
 }
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
     // freopen("in.txt","r",stdin);
     #endif
-    //ios_base::sync_with_stdio(false);
-    //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    int n;
+    cin>>n;
+    for(int i = 0;i<n;i++) cin>>s[i],ar[i] = i;
+    sort(ar,ar+n,cmp);
+    bool f = 0 ;
+    for(int i = 0;i<n-1;i++) {
+        int x = ar[i];
+        int y = ar[i+1];
+        for(int j = 0;j<s[x].length();j++) {
+            if(s[x][j]!=s[y][j]) {
+                f = 1;
+            }
+        }
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
+    if(f ==1) {
+        cout<<"Impossible"<<endl;
+    } else cout<<s[ar[n-1]].length()<<endl;
 
 
 

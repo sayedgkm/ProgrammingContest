@@ -46,30 +46,93 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
+vector<int>adj[N];
+int table[32][N];  ///for sparse  table
+int depth[N];     ///depth of each node from root
+int parent[N];
+vector<pii> disc[N];
+int level[N];
+int t = 1;
+int st[N];
+int ed[N];
+void dfs(int s,int p,int d){
+    parent[s]=p;
+    depth[s]=d;
+    level[s] = d;
+    disc[d].pb(make_pair(t,s));
+    st[s] = t;
+    t++;
+    for(int i=0;i<adj[s].size();i++){
+        int t=adj[s][i];
+        if(t==p) continue;
+        dfs(t,s,d+1);
+      }
+    ed[s] = t-1;
 
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
 }
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+void lca_init(int n){
+   SET(table);
+   for(int i=0;i<n;i++){
+      table[0][i]=parent[i];
     }
+    for(int i=1;(1<<i)<n;i++){
+         for(int j=0;j<n;j++){
+            table[i][j]=(table[i-1][j]==-1?-1:table[i-1][table[i-1][j]]);
+        }
+    }
+
+}
+int lca_query(int p,int q){  ///p && q are two nodes.
+    if(depth[q]>depth[p])
+        swap(p,q);
+    int log=1;
+    while((1<<log)<depth[p]) log++;
+    for(int i=log;i>=0;i--){
+        if(depth[p]-(1<<i)>=depth[q])  ///making same level of p and q
+            p=table[i][p];
+    }
+    if(p==q)
+        return p;
+    for(int i=log;i>=0;i--){
+        if(table[i][p]!=-1&&table[i][p]!=table[i][q])
+               p=table[i][p],q=table[i][q];
+    }
+    return parent[p];
+
+}
+int getParent(int u,int x) {
+
+    for(int i = 20;i>=0;i--) {
+        if((1<<i)<=x) {
+            u=table[i][u];
+            if(u==-1) return -1;
+            x-=(1<<i);
+        }
+    }
+    return u;
+
+}
+vector<int> root;
+int lo(int l,int x) {
+    int lo =0;
+    int hi = disc[l].size()-1;
+    while(lo<=hi) {
+        int mid = (lo+hi) /2;
+        if(disc[l][mid].ff<x) lo = mid+1;
+        else hi = mid-1;
+    }
+    return lo;
+}
+int hi(int l,int x) {
+    int lo =0;
+    int hi = disc[l].size()-1;
+    while(lo<=hi) {
+        int mid = (lo+hi) /2;
+        if(disc[l][mid].ff<=x) lo = mid+1;
+        else hi = mid-1;
+    }
+    return lo-1;
+
 }
 int main(){
     #ifdef sayed
@@ -78,24 +141,32 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int n =  nxt();
+    for(int i = 1;i<=n;i++) {
+        int a= nxt();
+        if(a==0) root.pb(i-1);
+        else adj[a-1].pb(i-1);
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    SET(parent);
+    for(auto it:root) dfs(it,-1,0);
+    lca_init(n);
 
-        printf("%lld\n",ans);
+    int q = nxt();
+    while(q--) {
+
+        int u = nxt()-1;
+        int x= nxt();
+        u = getParent(u,x);
+        debug(u);
+        if(u==-1) printf("0 ");
+        else {
+
+            int l = level[u];
+            l+=x;
+            printf("%d ",hi(l,ed[u])-lo(l,st[u]));
+
+        }
     }
-
 
 
     return 0;

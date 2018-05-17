@@ -46,31 +46,8 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+int ar[202][202];
+vector<pii> v;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,24 +55,45 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
 
-        printf("%lld\n",ans);
-    }
+    int test = nxt();
+    while(test--) {
+         int a= nxt();
+         srand(time(0));
+         if(a==20) {
+            v.pb(make_pair(2,2));
+            v.pb(make_pair(2,3));
+            v.pb(make_pair(2,4));
+            v.pb(make_pair(3,2));
+            v.pb(make_pair(3,3));
+            v.pb(make_pair(3,4));
+             for(int i = 0;i<1000;i++) {
+                int r = rand()%(int)v.size();
+                printf("%d %d\n",v[r].ff,v[r].ss);
+                fflush(stdout);
+                int x = nxt();
+                int y = nxt();
+                if(x==0&&y==0) break;
+            }
+         } else {
+            for(int i = 2;i<=3;i++) {
+                for(int j = 2;j<=49;j++) {
+                    v.pb(make_pair(i,j));
+                }
+            }
+            for(int i = 0;i<1000;i++) {
+                int r = rand()%(int)v.size();
+                printf("%d %d\n",v[r].ff,v[r].ss);
+                fflush(stdout);
+                int x = nxt();
+                int y = nxt();
+                if(x==0&&y==0) break;
+            }
 
+
+         }
+
+    }
 
 
     return 0;

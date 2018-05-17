@@ -46,31 +46,7 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+ll ar[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,24 +54,79 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
+    int test = nxt();
+    int cs = 1;
+    while(test--) {
+        ll n= lxt();
         ll l = lxt();
-        ll r = lxt();
+        ll sum = 0;
+        for(int i = 0;i<l;i++) ar[i] = lxt(),sum+=ar[i];
+        ll baki=n-sum;
         ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+        double tmp1;
+        ll tmp2,down;
+        for(int i = 0;i<l;i++) {
+            tmp1 = (double)ar[i]/(double)n;
+            tmp1*=100.0;
+            tmp2 = round(tmp1);
+            down = (ll) tmp1;
+            if(tmp2>down){
+                ans+=(ll)tmp2;
+            } else{
+                if(tmp1==(double)down) {
+                    ans+=down;
+                } else {
+                    bool f = 0;
+                    while(1) {
+                        if(baki==0) break;
+                        baki--;
+                        ar[i]++;
+                        tmp1 = (double)ar[i]/(double)n;
+                        tmp1*=100.0;
+                        tmp2 = round(tmp1);
+                        down = (ll) tmp1;
+                        if(tmp2>down) {
+                            f =1;
+                            ans+=tmp2;
+                            break;
+                        }
+                    }
+                    if(f==0) {
 
-        printf("%lld\n",ans);
+                        tmp1 = (double)ar[i]/(double)n;
+                        tmp1*=100;
+                        tmp2 = round(tmp1);
+                        down = (ll) tmp1;
+
+                        ans+=tmp2;
+                    }
+
+                }
+            }
+        }
+        ll val = 0;
+        while(baki--) {
+            val++;
+            tmp1 = (double)val/(double)n;
+            tmp1*=100.0;
+            tmp2 = round(tmp1);
+            down = (ll) tmp1;
+            if(tmp2>down) {
+                ans+=tmp2;
+                val = 0;
+            }
+
+        }
+        if(val) {
+            tmp1 = (double)val/(double)n;
+            tmp1*=100.0;
+            tmp2 = round(tmp1);
+            down = (ll) tmp1;
+            ans+=tmp2;
+        }
+        printf("Case #%d: %lld\n",cs++,ans);
+
     }
-
 
 
     return 0;

@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               200010
+#define        N                               2000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,30 +46,29 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+pair<pii,int> ar[N];
+map<int,int>mp;
+int tree[N];
+void update(int idx,int n,int x)
+{
+    while(idx<=n)
+    {
+        tree[idx]+=x;
+        idx+= idx&(-idx);
     }
+}
+ll query(int idx){
+     ll sum=0;
+     while(idx>0)
+     {
+         sum+=tree[idx];idx-=idx&(-idx);
+     }
+   return sum;
+}
+bool cmp(pair<pii,int> x,pair<pii,int> y){
+    if(x.ff.ss==y.ff.ss) return x.ff.ff<y.ff.ff;
+    return x.ff.ss>y.ff.ss;
+
 }
 int main(){
     #ifdef sayed
@@ -78,23 +77,45 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
     int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
+    for(int i = 0;i<n;i++){
+        ar[i].ff.ff = nxt();
+        ar[i].ff.ss = nxt();
+        ar[i].ss = i;
+        mp[ar[i].ff.ff]= mp[ar[i].ff.ss]=0;
     }
+    sort(ar,ar+n);
+
+    int rnk = 1;
+    for(auto it : mp) {
+        mp[it.ff] = rnk++;
+    }
+    for(int i = 0;i<n;i++) {
+        if(query(rnk)-query(mp[ar[i].ff.ss]-1)){
+
+            for(int j = i-1;j>=0;j--) {
+                if(ar[j].ff.ss>=ar[i].ff.ss){
+                    cout<<ar[i].ss+1<<" "<<ar[j].ss+1<<endl;
+                    return 0;
+                }
+            }
+        }
+        update(mp[ar[i].ff.ss],rnk,1);
+    }
+    CLR(tree);
+    sort(ar,ar+n,cmp);
+    for(int i = 0;i<n;i++) {
+        if(query(mp[ar[i].ff.ff])){
+            for(int j = i-1;j>=0;j--) {
+                if(ar[j].ff.ff<=ar[i].ff.ff){
+                    cout<<ar[i].ss+1<<" "<<ar[j].ss+1<<endl;
+                    return 0;
+                }
+            }
+        }
+        update(mp[ar[i].ff.ff],rnk,1);
+    }
+    cout<<-1<<" "<<-1<<endl;
 
 
 

@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               200010
+#define        N                               400010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,30 +46,23 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+ll ar[N];
+ll dp[1000][1000];
+ll l,n;
+ll go(int pos,int baki) {
+    if(baki==0&&pos>=l) {
+        return 0;
     }
+    ll &res = dp[pos][baki];
+    if(res!=-1) return res;
+    res =0;
+    for(int i = (ar[pos]==0)?1:0;i<=baki;i++) {
+        double ok = (double)(ar[pos]+i)/n;
+        ok*=100;
+        ok = round(ok);
+        res = max(res,go(pos+1,baki-i)+(ll)ok);
+    }
+    return res;
 }
 int main(){
     #ifdef sayed
@@ -78,24 +71,20 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    int test = nxt();
+    int cs = 1;
+    while(test--) {
+        CLR(ar);
+        SET(dp);
+        n = lxt();
+        l = lxt();
+        ll sum = 0;
+        for(int i = 0;i<l;i++) ar[i] = lxt(),sum+=ar[i];
+        ll baki = n-sum;
+        ll ans = go(0,baki);
+        printf("Case #%d: %lld\n",cs++,ans);
 
-        printf("%lld\n",ans);
     }
-
 
 
     return 0;

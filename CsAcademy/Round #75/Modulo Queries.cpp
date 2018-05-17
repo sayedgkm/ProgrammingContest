@@ -46,30 +46,25 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+const int block=1000;
+vector<int> v[200+10];
+const int mx = (4*(int)1e4)+5;
+int ar[mx+5];
+int br[2*mx+5];
+int ans[305][mx+5];
+int get_ans(int l,int r,int mod) {
+    int i = l;
+    int res = 0;
+    for(;i<=r&&i%block;i++) {
+        res = max(res,ar[i]%mod);
     }
+    for(;i+block-1<=r;i+=block) {
+        res = max(res,ans[i/block][mod]);
+    }
+    for(;i<=r;i++) {
+         res = max(res,ar[i]%mod);
+    }
+    return res;
 }
 int main(){
     #ifdef sayed
@@ -78,24 +73,35 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
     int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    int m = nxt();
+    for(int i = 0;i<n;i++) {
+        ar[i] = nxt();
+        v[i/block].pb(ar[i]);
+    }
+    for(int i= 0;i<=(n-1)/block;i++) {
+        CLR(br);
+        for(auto it : v[i]) br[it] = it;
+        for(int i = 1;i < 2*mx; i++) if(br[i]==0) br[i] = br[i-1];
+        for(int j = 2;j<mx;j++) {
+            for(int k = j;k<2*mx;k+=j) {
+                ans[i][j] = max(ans[i][j],br[k-1]%j);
+            }
+        }
 
-        printf("%lld\n",ans);
     }
 
+    while(m--) {
+        int a= nxt();
+        int b= nxt();
+        a--,b--;
+        int mod = nxt();
+        if(mod==1) {
+            printf("0\n");
+            continue;
+        }
+        printf("%d\n",get_ans(a,b,mod));
+    }
 
 
     return 0;

@@ -46,30 +46,38 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
+ll D[N],A[N],B[N];
+ll go(int i,int t) {
+    ll m=D[i]+A[i],n=-inf;
+    ll c = 1;
+    for(int j = i+1;j<t;j++) {
+        if(D[j]+A[j]==m){
+            c++;
+        } else {
+            if(n==-inf) {
+                n = D[j]-B[j];
+                c++;
+            } else if(n==D[j]-B[j]){
+                c++;
+            } else break;
         }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
     }
+    ll c2 = 1;
+    m = -inf;
+    n = D[i]-B[i];
+    for(int j = i+1;j<t;j++) {
+        if(D[j]-B[j]==n){
+            c2++;
+        } else {
+            if(m==-inf) {
+                m = D[j]+A[j];
+                c2++;
+            } else if(m==D[j]+A[j]){
+                c2++;
+            } else break;
+        }
+    }
+    return max(c,c2);
 }
 int main(){
     #ifdef sayed
@@ -78,24 +86,26 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    int test = nxt();
+    int cs = 1;
+    while(test--) {
 
-        printf("%lld\n",ans);
+        int n = nxt();
+        for(int i = 0;i<n;i++) {
+            D[i]= lxt(),A[i]= lxt(),B[i]=lxt();
+        }
+        ll mx = 0;
+        ll tot= 0;
+        for(int i = 0;i<n;i++){
+            if(n-i<=mx) break;
+            mx = max(mx,go(i,n));
+        }
+        for(int i = 0;i<n;i++) {
+            if(go(i,n)==mx) tot++;
+            if(n-i<=mx) break;
+        }
+        printf("Case #%d: %lld %lld\n",cs++,mx,tot);
     }
-
 
 
     return 0;

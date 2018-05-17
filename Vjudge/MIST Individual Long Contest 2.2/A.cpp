@@ -46,31 +46,42 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
+map<pii,int> mp;
+vector<int> adj[N];
+vector<int> euler_cycle; /// 0 based node
+void find_cycle(int u) {
 
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+    for(int i =0;i<adj[u].size();i++) {
+        int it = adj[u][i];
+        if(mp[make_pair(u,it)]==0) continue;
+        mp[make_pair(u,it)]--;
+        find_cycle(it);
     }
+    euler_cycle.pb(u);
+
 }
+int in[N],out[N];
+bool is_euler_cycle(int n) {
+    for(int i =0;i<n;i++) {
+        if(in[i]!=out[i]) return false;
+    }
+    return true;
+}
+bool is_euler_path(int n) {
+    int odd = 0;
+    int even = 0;
+    for(int i =0;i<n;i++){
+        if(in[i]==out[i]) even++;
+        else {
+            if(abs(in[i]-out[i])>1) return false;
+            odd++;
+        }
+    }
+    return odd==2;
+}
+string s[1005];
+char t[30];
+vector<int> v[27][27];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,25 +89,72 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
-    }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    int test = nxt(); int cs = 1;
+    while(test--){
+        int n= nxt();
+        for(int i = 0;i<n;i++) {
+            scanf("%s",t);
+            s[i] = t;
+        }
+      //  debug("ok");
+        for(int i = 0;i<n;i++) {
+            int a = s[i][0]-'a';
+            int b = s[i][s[i].size()-1]-'a';
+            mp[make_pair(a,b)]++;
+            adj[a].pb(b);
+            v[a][b].pb(i);
+            in[b]++;
+            out[a]++;
+        }
+        printf("Case %d: ",cs++);
+        bool flag = 0;
+        if(is_euler_cycle(26)) {
+            int a = -1;
+            for(int i =0;i<26;i++) if(in[i]>0) {a= i;break;}
+            find_cycle(a);
+            reverse(ALL(euler_cycle));
+            //euler_cycle.pop_back();
+        } else if(is_euler_path(26)){
+            int a = -1;
+            int b = -1;
+            for(int i = 0;i<26;i++){
+                if(in[i]!=out[i]){
+                    if(a==-1) a= i;
+                    else b = i;
+                }
+            }
+            if(out[a]<in[a]) swap(a,b);
+            find_cycle(a);
+            reverse(ALL(euler_cycle));
+        } else {
+            flag = 1;
+        }
+        if(euler_cycle.size()!=n+1) flag= 1;
+        if(flag==1) printf("No\n");
+        else {
+            printf("Yes\n");
 
-        printf("%lld\n",ans);
+            for(int i =0;i<euler_cycle.size()-1;i++) {
+                if(i) printf(" ");
+                int a = euler_cycle[i];
+                int b = euler_cycle[i+1];
+
+                printf("%s",s[v[a][b].back()].c_str());
+                v[a][b].pop_back();
+            }
+            printf("\n");
+        }
+        CLR(in);CLR(out);
+        euler_cycle.clear();
+        mp.clear();
+        for(int i =0;i<27;i++) adj[i].clear();
+        for(int i =0;i<27;i++) for(int j = 0;j<27;j++) v[i][j].clear();
     }
+
 
 
 
     return 0;
 }
+
+

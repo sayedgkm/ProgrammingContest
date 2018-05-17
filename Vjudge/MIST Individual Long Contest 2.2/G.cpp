@@ -46,30 +46,66 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
+#define  gray  1
+#define  white 0
+#define  black 2
+vector<int> adj[N];
+int disc[N],low[N],color[N],visited[N];
+int counter=1;
+int root;
+int point[N];
+void init(){
+    counter =1 ;
+    for(int i = 0;i<N;i++) {
+        adj[i].clear();
+        disc[i] = low[i]= color[i]= visited[i] = point[i] = 0;
     }
+}
+int artpoint(int s,int p) {
+    disc[s]=low[s]=counter++;  ///discovery time and lowest back edge extension
+    color[s]=gray;
+    int child=0; ///only for root.
+    for(int i=0; i<adj[s].size(); i++) {
+        int t=adj[s][i];
+        if(t==p)  ///don't go to parent
+            continue;
+        if(color[t]==white) {   ///Tree Edge
+            child++;
+            artpoint(t,s);
+            if(s==root&&child>1) {  ///for root articulation point is different case
+                if(!visited[s])
+                    point[s] = 1;
+                visited[s]=1;
+            }
+            if(disc[s]<=low[t]&&s!=root) {
+                if(!visited[s])
+                    point[s] = 1;
+                visited[s]=1;
+            }
+            low[s]=min(low[s],low[t]);
+        } else if(color[t]==gray) {         ///Back Edge
+            low[s]=min(low[s],disc[t]);
+        }
+    }
+
+}
+unsigned ll cnt = 0;
+int cutReach = 0;
+set<int> st;
+void dfs(int u) {
+    cnt++;
+    visited[u] =1 ;
+    for(int i = 0;i<adj[u].size();i++){
+        if(point[adj[u][i]]==1) {
+            st.insert(adj[u][i]);
+        }
+        if(visited[adj[u][i]]==0&&point[adj[u][i]]==0)
+            dfs(adj[u][i]);
+
+    }
+}
+ll nc2(ll n) {
+    return (n*n-n)/2LL;
 }
 int main(){
     #ifdef sayed
@@ -78,25 +114,45 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int test = nxt();int cs =1;
+    while(test--) {
+        int n= nxt();
+        int m  = nxt();
+        for(int i =0;i<m;i++) {
+            int a= nxt();
+            int b= nxt();
+            adj[a].pb(b);
+            adj[b].pb(a);
+        }
+        for(int i = 0;i<n;i++) if(!color[i]){
+            root= i;
+            artpoint(i,-1);
+
+        }
+        unsigned ll ans = 1;
+        CLR(visited);
+        int c= 0;
+        for(int i = 0;i<n;i++) {
+            cnt = 0;cutReach = 0;
+            st.clear();
+            if(!(visited[i]==1||point[i]==1)){
+                dfs(i);
+                cutReach = st.size();
+                if(cutReach==0) ans+=nc2(cnt)-1,c++;
+                else if(cutReach==1)
+                    ans*=cnt;
+                else {
+                    continue;
+                }
+                c++;
+            }
+
+        }
+
+        printf("Case %d: %d %llu\n",cs++,c,ans);
+        init();
+
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
-
 
     return 0;
 }

@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               200010
+#define        N                               100010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,30 +46,31 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
+struct info{
+    int l,r,id;
+}query[50005];
+int ar[N];
+int sum,ans[N];
+int mark[N];
+int tmp[N];
+int l=0,r=-1,k=320;
+void add(int i) {
+    tmp[mark[ar[i]]]--;
+    mark[ar[i]]++;
+    tmp[mark[ar[i]]]++;
+    sum = max(sum,mark[ar[i]]);
 }
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
+void del(int i) {
+    tmp[mark[ar[i]]]--;
+    if(tmp[mark[ar[i]]]==0&&mark[ar[i]]==sum) sum--;
+    mark[ar[i]]--;
+     tmp[mark[ar[i]]]++;
 
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
+}
+bool cmp(info a,info b){
+    if(a.l/k==b.l/k)
+        return a.r<b.r;
+    return (a.l)<(b.l);
 }
 int main(){
     #ifdef sayed
@@ -78,25 +79,37 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+    int test = nxt();
+    int cs =1 ;
+    while(test--) {
+
+       int n, c, q;
+        scanf("%d %d %d", &n, &c, &q);
+        for(int i =0;i<n;i++) scanf("%d",ar+i);
+        k = sqrt(n);
+        for(int i =0;i<q;i++) {
+            scanf("%d%d",&query[i].l,&query[i].r);
+            query[i].l-=1;
+            query[i].r-=1;
+            query[i].id = i;
+        }
+        sort(query,query+q,cmp);
+         sum = 0;
+         l = 0,r = -1;
+         for(int i = 0;i<q;i++) {
+            while(r<query[i].r) add(++r);
+            while(r>query[i].r) del(r--);
+            while(l<query[i].l) del(l++);
+            while(l>query[i].l) add(--l);
+            ans[query[i].id]= sum;
+        }
+        printf("Case %d:\n",cs++);
+        for(int i = 0;i<q;i++){
+            printf("%d\n",ans[i]);
+        }
+        CLR(tmp);
+        CLR(mark);
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
-
-        printf("%lld\n",ans);
-    }
-
-
 
     return 0;
 }

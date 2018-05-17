@@ -46,31 +46,10 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<ll> v;
-map<ll,int> mp;
-ll Sqrt(ll x) {
-
-    ll sq = sqrt(x);
-    sq-=2;
-    sq = max(sq,0LL);
-    while(sq*sq<=x) sq++;
-    return sq-1;
-}
-void gen(ll tmp) {
-    for(ll i = 2; ;i++) {
-        ll ans =1;
-        for(int j = 0;j<tmp;j++) {
-            if((ll)2e18/ans<i) return;
-            ans*=i;
-
-        }
-        ll sq = Sqrt(ans);
-        if(sq*sq==ans) continue;
-        if(mp.count(ans)) continue;
-        mp[ans] = 1;
-        v.pb(ans);
-    }
-}
+int ar[N];
+int s[N];
+map<int,int> mp;
+vector<int> v;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,25 +57,36 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    for(int i = 3;i<=70;i++) {
-        gen(i);
+
+    int n = nxt();
+    for(int i = 0;i<n;i++) {
+        ar[i] = nxt();
     }
-    sort(ALL(v));
-    int n= nxt();
-    while(n--) {
-        ll l = lxt();
-        ll r = lxt();
-        ll ans = 0;
-        if(l==1) ans++,l++;
-        ans+=Sqrt(r)-Sqrt(l-1);
-        int lo = lower_bound(ALL(v),l)-v.begin();
-        int hi = upper_bound(ALL(v),r)-v.begin();
-        ans+=hi-lo;
+    int mx = 0;
+    for(int i =0;i<n;i++) {
+        s[i] =mp[ar[i]]= max(mp[ar[i]],mp[ar[i]-1]+1);
 
-        printf("%lld\n",ans);
+        mx = max(mx,s[i]);
     }
+    int last = -1;
+    for(int i= n-1;i>=0;i--) {
+        if(s[i]==mx) {
+            if(last==-1) {
+                v.pb(i);
+                mx--;
+                last= ar[i];
+            } else {
+                if(ar[i]==last-1){
+                    v.pb(i);
+                    mx--;
+                    last =ar[i];
+                }
+            }
 
-
-
+        }
+    }
+    reverse(ALL(v));
+    cout<<v.size()<<endl;
+    for(auto it : v) printf("%d ",it+1);
     return 0;
 }
