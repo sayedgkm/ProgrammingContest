@@ -46,83 +46,43 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
-int disc[N],low[N],color[N],visited[N];
-int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
-    for(int i=0; i<adj[s].size(); i++) {
-        int t=adj[s][i];
-        if(t==p)
-            continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
-            }
-
-            low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
-            low[s]=min(low[s],disc[t]);
-
-    }
-
-}
-int root; /// make root different for every different component
-void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
-
-    for(int i  = 0;i<adj[u].size();i++) {
-        int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
+int ar[N];
+int go(string s,int a,int b){
+    int ind= -1;
+    for(int i= s.length()-1;i>=0;i--){
+        if(s[i]-'0'==b) {
+            ind= i;
+            break;
         }
     }
-}
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
-    }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
-            }
+    if(ind ==-1) return inf;
+    int ans = s.length()-1-ind;
+    s.erase(s.begin()+ind);
+
+    ind = -1;
+    for(int i= s.length()-1;i>=0;i--){
+        if(s[i]-'0'==a) {
+            ind= i;
+            break;
         }
     }
-}
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
+    if(ind ==-1) return inf;
+    ans += s.length()-1-ind;
+    s.erase(s.begin()+ind);
+    s+=(char)(a+'0');
+    s+=(char)(b+'0');
+
+    ind = -1;
+    for(int i= 0;i<s.length()-2;i++){
+        if((s[i]-'0')>0) {
+            ind= i;
+            break;
         }
     }
-}
-int level[N];
-int tot = 0;
-void dfs(int u,int d,int p=-1) {
-    level[u] = d;
-    for(int i= 0;i<bt[u].size();i++) {
-        int v = bt[u][i];
-        if(p==v) continue;
-        tot++;
-        dfs(v,d+1,u);
-    }
+    if(ind ==-1) return inf;
+    ans+=ind;
+
+    return ans;
 }
 int main(){
     #ifdef sayed
@@ -131,35 +91,38 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    int test = nxt();
-    while(test--) {
-        int n = nxt();
-        int m =nxt();
-        for(int i = 0;i<m;i++) {
-            int a= nxt()-1;
-            int b= nxt()-1;
-            adj[a].pb(b);
-            adj[b].pb(a);
-        }
-        make_tree(n);
-        //print_bt(n);
-        tot = 0;
-        CLR(level);
-        dfs(0,0);
-        int mx = 0;int node = -1;
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]],node =cycle[i];
-        CLR(level);
-        tot =0;
-        mx =0;
-        dfs(node,0);
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]];
-        //debug(mx,tot,node);
-        printf("%d\n",tot-mx);
-        for(int i =0;i<n;i++) adj[i].clear();
+    string s;
+    cin>>s;
+    if(s.length()==1){
+        cout<<-1<<endl;;
+    } else if(s.length()==2) {
+        int num = s[0]-'0';
+        num*=10;
+        num+=s[1]-'0';
+        if(num%25==0) {
+            cout<<0<<endl;
+        } else {
+            swap(s[0],s[1]);
+            num = s[0]-'0';
+            num*=10;
+            num+=s[1]-'0';
+            if(num%25==0) {
+                cout<<1<<endl;;
+            } else {
+                cout<<-1<<endl;
+            }
 
+        }
+    } else {
+        int ans = inf;
+        ans = min(ans,go(s,5,0));
+        ans = min(ans,go(s,0,0));
+        ans = min(ans,go(s,2,5));
+        ans = min(ans,go(s,7,5));
+        if(ans==inf) ans =-1;
+        cout<<ans<<endl;
 
     }
-
 
     return 0;
 }

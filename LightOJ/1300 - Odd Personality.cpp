@@ -46,82 +46,54 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
-int disc[N],low[N],color[N],visited[N];
+vector<int> adj[N];
+int disc[N],low[N],color[N];
+int vis[N];int cnt = 0;
 int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
-    for(int i=0; i<adj[s].size(); i++) {
-        int t=adj[s][i];
-        if(t==p)
-            continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
-            }
+int root;
 
-            low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
-            low[s]=min(low[s],disc[t]);
-
+int odd[N];
+void init(){
+    counter =1 ;
+    for(int i = 0;i<N;i++) {
+        adj[i].clear();
+        disc[i] = low[i]= color[i]= vis[i]  = odd[i]=0;
     }
-
 }
-int root; /// make root different for every different component
-void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
+stack<int>st;
+ll ans = 0;
+int dfs(int u,int p = -1) {
+    vis[u] = 1;
+    disc[u] = low[u] = counter++;
+    st.push(u);
+    for(int i =0;i<adj[u].size();i++) {
+        int  v= adj[u][i];
+        if(v==p)continue;
+        if(vis[v]==0) {
+            if(color[u]==1) color[v] = 2;
+            else color[v] = 1;
+            dfs(v,u);
+            low[u]= min(low[v],low[u]);
+        } else {
+            low[u] = min(low[v],low[u]);
 
-    for(int i  = 0;i<adj[u].size();i++) {
-        int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
+            if(color[u]==color[v]) odd[u] = odd[v] = 1;
         }
     }
-}
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
-    }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
-            }
+
+    if(disc[u]==low[u]) {
+        set<int> ok ;
+        int x  = -1;
+        int f = 0;
+        while(u!=x) {
+            x = st.top();
+
+            st.pop();
+            if(odd[x]==1) f = 1;
+            ok.insert(x);
         }
-    }
-}
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
-        }
-    }
-}
-int level[N];
-int tot = 0;
-void dfs(int u,int d,int p=-1) {
-    level[u] = d;
-    for(int i= 0;i<bt[u].size();i++) {
-        int v = bt[u][i];
-        if(p==v) continue;
-        tot++;
-        dfs(v,d+1,u);
+
+        if(f) ans+=ok.size();
     }
 }
 int main(){
@@ -131,35 +103,24 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    int test = nxt();
-    while(test--) {
-        int n = nxt();
-        int m =nxt();
-        for(int i = 0;i<m;i++) {
-            int a= nxt()-1;
-            int b= nxt()-1;
-            adj[a].pb(b);
+   int test = nxt();int cs = 1;
+   while(test--) {
+        int n= nxt();
+        int m = nxt();
+        for(int i =0;i<m;i++){
+            int a= nxt();
+            int b= nxt();adj[a].pb(b);
             adj[b].pb(a);
         }
-        make_tree(n);
-        //print_bt(n);
-        tot = 0;
-        CLR(level);
-        dfs(0,0);
-        int mx = 0;int node = -1;
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]],node =cycle[i];
-        CLR(level);
-        tot =0;
-        mx =0;
-        dfs(node,0);
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]];
-        //debug(mx,tot,node);
-        printf("%d\n",tot-mx);
-        for(int i =0;i<n;i++) adj[i].clear();
+        ans = 0;
+        for(int i = 0;i<n;i++) if(!vis[i]) color[i]=1,dfs(i);
+        printf("Case %d: %lld\n",cs++,ans);
+        init();
 
+   }
 
-    }
 
 
     return 0;
 }
+

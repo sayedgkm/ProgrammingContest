@@ -46,83 +46,50 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
-int disc[N],low[N],color[N],visited[N];
-int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
-    for(int i=0; i<adj[s].size(); i++) {
-        int t=adj[s][i];
-        if(t==p)
-            continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
+int ar[N];
+set<int> mp;
+int go(int st,ll val,int n) {
+    int c = 0;
+    int ans =0;
+
+        c = 0;
+        ll tmp =st+val;
+        if(tmp<INT_MAX)
+            if(mp.count(tmp))c++;
+        tmp+=val;
+        if(tmp<INT_MAX)
+            if(mp.count((ll)st+2LL*val)) c++;
+        ans = max(ans,c+1);
+
+    return ans;
+}
+void print(int st,ll val,int mx,int n) {
+
+   int c = 0;
+    int ans =0;
+
+        c = 0;
+        ll tmp =st+val;
+        if(tmp<INT_MAX)
+            if(mp.count(tmp))c++;
+        tmp+=val;
+        if(tmp<INT_MAX)
+            if(mp.count((ll)st+2LL*val)) c++;
+        if(c+1==mx) {
+            int p = st;
+            c++;
+            printf("%d\n",c);
+            while(c) {
+                if(mp.count(p)){
+                    printf("%d ",p);
+                    c--;
+                }
+                p+=val;
+
             }
-
-            low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
-            low[s]=min(low[s],disc[t]);
-
-    }
-
-}
-int root; /// make root different for every different component
-void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
-
-    for(int i  = 0;i<adj[u].size();i++) {
-        int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
+            return;
         }
-    }
-}
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
-    }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
-            }
-        }
-    }
-}
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
-        }
-    }
-}
-int level[N];
-int tot = 0;
-void dfs(int u,int d,int p=-1) {
-    level[u] = d;
-    for(int i= 0;i<bt[u].size();i++) {
-        int v = bt[u][i];
-        if(p==v) continue;
-        tot++;
-        dfs(v,d+1,u);
-    }
+
 }
 int main(){
     #ifdef sayed
@@ -131,35 +98,28 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    int test = nxt();
-    while(test--) {
-        int n = nxt();
-        int m =nxt();
-        for(int i = 0;i<m;i++) {
-            int a= nxt()-1;
-            int b= nxt()-1;
-            adj[a].pb(b);
-            adj[b].pb(a);
+    int n= nxt();
+    for(int i =0;i<n;i++)ar[i] = nxt(),mp.insert(ar[i]);
+    int mx = 0;
+    for(int j = 0;j<n;j++) {
+        for(ll i = 0;i<=30;i++) {
+            int num =1LL<<i;
+            mx = max(mx,go(ar[j],num,n));
+            if(mx==3) {
+                print(ar[j],num,3,n);
+                return 0;
+            }
         }
-        make_tree(n);
-        //print_bt(n);
-        tot = 0;
-        CLR(level);
-        dfs(0,0);
-        int mx = 0;int node = -1;
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]],node =cycle[i];
-        CLR(level);
-        tot =0;
-        mx =0;
-        dfs(node,0);
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]];
-        //debug(mx,tot,node);
-        printf("%d\n",tot-mx);
-        for(int i =0;i<n;i++) adj[i].clear();
-
-
     }
-
+    for(int j =0;j<n;j++) {
+        for(int i = 0;i<=30;i++) {
+            int num =1LL<<i;
+            if(mx== go(ar[j],num,n)) {
+                print(ar[j],num,mx,n);
+                return 0;
+            }
+        }
+    }
 
     return 0;
 }

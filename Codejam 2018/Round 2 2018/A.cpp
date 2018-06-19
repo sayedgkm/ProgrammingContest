@@ -46,84 +46,10 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
-int disc[N],low[N],color[N],visited[N];
-int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
-    for(int i=0; i<adj[s].size(); i++) {
-        int t=adj[s][i];
-        if(t==p)
-            continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
-            }
-
-            low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
-            low[s]=min(low[s],disc[t]);
-
-    }
-
-}
-int root; /// make root different for every different component
-void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
-
-    for(int i  = 0;i<adj[u].size();i++) {
-        int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
-        }
-    }
-}
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
-    }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
-            }
-        }
-    }
-}
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
-        }
-    }
-}
-int level[N];
-int tot = 0;
-void dfs(int u,int d,int p=-1) {
-    level[u] = d;
-    for(int i= 0;i<bt[u].size();i++) {
-        int v = bt[u][i];
-        if(p==v) continue;
-        tot++;
-        dfs(v,d+1,u);
-    }
-}
+int ar[N];
+int ans[500][500];
+int ok[N];
+int input[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -131,32 +57,77 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    int test = nxt();
-    while(test--) {
+    int test =nxt();
+    int cs = 1;
+    while(test--){
         int n = nxt();
-        int m =nxt();
-        for(int i = 0;i<m;i++) {
-            int a= nxt()-1;
-            int b= nxt()-1;
-            adj[a].pb(b);
-            adj[b].pb(a);
+        int sum = 0;
+        for(int i =0;i<n;i++) {
+            ar[i] = nxt();
+            sum+=ar[i];
+            input[i] = ar[i];
         }
-        make_tree(n);
-        //print_bt(n);
-        tot = 0;
-        CLR(level);
-        dfs(0,0);
-        int mx = 0;int node = -1;
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]],node =cycle[i];
-        CLR(level);
-        tot =0;
-        mx =0;
-        dfs(node,0);
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]];
-        //debug(mx,tot,node);
-        printf("%d\n",tot-mx);
-        for(int i =0;i<n;i++) adj[i].clear();
+        printf("Case #%d: ",cs++);
+        if(ar[0]==0||ar[n-1]==0||sum!=n){
+            printf("IMPOSSIBLE\n");
+            continue;
+        }
+        int l = 0;
+        ar[0]--;
+        ar[n-1]--;
+        int r = 1;
+        int c= 1;
+        int mx = 0;
+        while(l<n) {
+            while(ar[l]==0&&l<n) l++;
+            if(l>c) {
+                int diff = l-c;
+                mx = max(mx,diff);
+                for(int i =diff,j=c;i>0&&j<n;i--,j++) {
+                    ans[i][j] = 100;
+                }
+            } else {
+                int diff = c - l;
+                mx = max(mx,diff);
+                for(int i = diff,j = c;i>0&&j>l;i--,j--){
+                    ans[i][j]=-100;
+                }
 
+            }
+            ar[l]--;
+            c++;
+        }
+        for(int i = 0;i<n;i++) {
+            int c = i;
+            for(int j = mx;j>=0;j--) {
+                if(ans[j][c]==100) c++;
+                else if(ans[j][c]==-100) c--;
+            }
+            ok[c]++;
+        }
+        bool f= 0;
+        for(int i =0;i<n;i++) if(input[i]!=ok[i]){
+            printf("IMPOSSIBLE\n");
+            f = 1;
+            break;
+        }
+        if(!f) {
+        printf("%d\n",mx+1);
+            for(int i = mx;i>=0;i--) {
+                for(int j = 0;j<n;j++) {
+                    if(ans[i][j]==100) printf("/");
+                    else if(ans[i][j]==-1) printf("\\");
+                    else printf(".");
+
+                }
+                printf("\n");
+            }
+
+        }
+        CLR(ar);
+        CLR(ok);
+        CLR(ans);
+        CLR(input);
 
     }
 

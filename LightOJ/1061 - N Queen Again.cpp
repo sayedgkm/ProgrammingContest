@@ -46,120 +46,92 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
-int disc[N],low[N],color[N],visited[N];
-int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
-    for(int i=0; i<adj[s].size(); i++) {
-        int t=adj[s][i];
-        if(t==p)
-            continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
-            }
-
-            low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
-            low[s]=min(low[s],disc[t]);
-
+int ar[N];
+vector<int> v[100];
+vector<int> queen;
+int cnt = 0;
+vector<pii> given;
+bool isValid(int r,int c) {
+    for(int i = 0;i<queen.size();i++) {
+        if(r==i||c==queen[i]) return false;
+       if(r+c==i+queen[i]) return false;
+        if(r-c==i-queen[i]) return false;
     }
-
+    return true;
 }
-int root; /// make root different for every different component
-void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
-
-    for(int i  = 0;i<adj[u].size();i++) {
-        int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
+int Move(int r1,int c1,int r2,int c2) {
+    if(r1==r2&&c1==c2) return 0;
+    if(r1==r2||c1==c2||r1+c1==r2+c2||r1-c1==r2-c2) return 1;
+    return 2;
+}
+void go(int pos){
+    if(queen.size()==8) {
+        v[cnt] = queen;
+        cnt++;
+        return;
+    }
+    for(int i =0;i<8;i++) {
+        if(isValid(pos,i)) {
+            queen.pb(i);
+            go(pos+1);
+            queen.pop_back();
         }
     }
+
 }
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
+int dp[9][(1<<9)+2];
+int go(int x,int pos,int mask) {
+    if(mask==(1<<8)-1){
+        return 0;
     }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
-            }
-        }
+    int &res = dp[pos][mask];
+    if(res!=-1) return res;
+    res = inf;
+    for(int i =0;i<given.size();i++) {
+       if(ison(mask,i)) continue;
+       res = min(res,go(x,pos+1,biton(mask,i))+Move(pos,v[x][pos],given[i].ff,given[i].ss));
     }
-}
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
-        }
-    }
-}
-int level[N];
-int tot = 0;
-void dfs(int u,int d,int p=-1) {
-    level[u] = d;
-    for(int i= 0;i<bt[u].size();i++) {
-        int v = bt[u][i];
-        if(p==v) continue;
-        tot++;
-        dfs(v,d+1,u);
-    }
+
+    return res;
 }
 int main(){
     #ifdef sayed
-    //freopen("out.txt","w",stdout);
+    freopen("out.txt","w",stdout);
     // freopen("in.txt","r",stdin);
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
+    go(0);
+
     int test = nxt();
+    int cs = 1;
     while(test--) {
-        int n = nxt();
-        int m =nxt();
-        for(int i = 0;i<m;i++) {
-            int a= nxt()-1;
-            int b= nxt()-1;
-            adj[a].pb(b);
-            adj[b].pb(a);
+        char t[8];
+        int n = 8;
+        for(int i = 0;i<n;i++) {
+            scanf("%s",t);
+            for(int j = 0;j<8;j++) {
+                if(t[j]=='q') given.pb(make_pair(i,j));
+            }
         }
-        make_tree(n);
-        //print_bt(n);
-        tot = 0;
-        CLR(level);
-        dfs(0,0);
-        int mx = 0;int node = -1;
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]],node =cycle[i];
-        CLR(level);
-        tot =0;
-        mx =0;
-        dfs(node,0);
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]];
-        //debug(mx,tot,node);
-        printf("%d\n",tot-mx);
-        for(int i =0;i<n;i++) adj[i].clear();
+//        printf("\n");
+//        for(int i = 0;i<8;i++) {
+//            for(int j = 0;j<8;j++) {
+//                if(v[11][i]==j) printf("q");
+//               else printf(".");
+//            }
+//            printf("\n");
+//        }
+        int res = inf;
+        for(int i =0;i<cnt;i++) {
+            SET(dp);
+            res = min(res,go(i,0,0));
+        }
+        printf("Case %d: %d\n",cs++,res);
 
 
+        given.clear();
     }
-
 
     return 0;
 }

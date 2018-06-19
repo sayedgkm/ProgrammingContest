@@ -46,83 +46,39 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
-int disc[N],low[N],color[N],visited[N];
-int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
-    for(int i=0; i<adj[s].size(); i++) {
-        int t=adj[s][i];
-        if(t==p)
-            continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
-            }
-
-            low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
-            low[s]=min(low[s],disc[t]);
-
-    }
-
+int get(char c) {
+    if(!isalpha(c)) return c-'0';
+    if(c=='A') return 1;
+    if(c=='T') return 10;
+    if(c=='J') return 11;
+    if(c=='Q') return 12;
+    if(c=='K') return 13;
 }
-int root; /// make root different for every different component
-void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
+unsigned ll dp[14][14][14][14][5];
+unsigned ll go(int one,int two,int three,int four,int last) {
+    //debug(one,two,three,four,last);
+    if(one+two+three+four==0) return 1;
+    unsigned ll res = dp[one][two][three][four][last];
+    if(res!=-1) return res;
+    res = 0;
+    if(last==2&&one) {
+        res+=go(one-1,two,three,four,1)*(unsigned ll) (one-1);
+    } else if(one) {
+        res+=go(one-1,two,three,four,1)*(unsigned ll) (one);
+    }
+    if(last==3&&two) {
+        res+=go(one+1,two-1,three,four,2)*(unsigned ll) (two-1)*2ULL;
+    } else if(two) {
+        res+=go(one+1,two-1,three,four,2)*(unsigned ll) (two)*2ULL;
+    }
 
-    for(int i  = 0;i<adj[u].size();i++) {
-        int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
-        }
+     if(last==4&&three) {
+        res+=go(one,two+1,three-1,four,3)*(unsigned ll) (three-1)*3ULL;
+    } else if(three) {
+        res+=go(one,two+1,three-1,four,3)*(unsigned ll) (three)*3ULL;
     }
-}
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
-    }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
-            }
-        }
-    }
-}
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
-        }
-    }
-}
-int level[N];
-int tot = 0;
-void dfs(int u,int d,int p=-1) {
-    level[u] = d;
-    for(int i= 0;i<bt[u].size();i++) {
-        int v = bt[u][i];
-        if(p==v) continue;
-        tot++;
-        dfs(v,d+1,u);
-    }
+    if(four) res+=go(one,two,three+1,four-1,4)*(unsigned ll) (four)*4ULL;
+    return res;
 }
 int main(){
     #ifdef sayed
@@ -131,35 +87,22 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    int test = nxt();
+    int test =nxt(); int cs = 1;
+    SET(dp);
     while(test--) {
         int n = nxt();
-        int m =nxt();
-        for(int i = 0;i<m;i++) {
-            int a= nxt()-1;
-            int b= nxt()-1;
-            adj[a].pb(b);
-            adj[b].pb(a);
+        char c[2]; int oc[14] ={0};
+        for(int i =0;i<n;i++) {
+            scanf("%s",c);
+            oc[get(c[0])]++;
         }
-        make_tree(n);
-        //print_bt(n);
-        tot = 0;
-        CLR(level);
-        dfs(0,0);
-        int mx = 0;int node = -1;
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]],node =cycle[i];
-        CLR(level);
-        tot =0;
-        mx =0;
-        dfs(node,0);
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]];
-        //debug(mx,tot,node);
-        printf("%d\n",tot-mx);
-        for(int i =0;i<n;i++) adj[i].clear();
-
+        int mark[5]={0};
+        for(int i =1;i<=13;i++) mark[oc[i]]++;
+        unsigned ll res= go(mark[1],mark[2],mark[3],mark[4],0);
+        printf("Case %d: %llu\n",cs++,res);
 
     }
 
-
     return 0;
 }
+

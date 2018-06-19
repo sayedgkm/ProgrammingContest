@@ -46,83 +46,66 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
+#define  gray  1
+#define  white 0
+#define  black 2
+vector<int> adj[N];
 int disc[N],low[N],color[N],visited[N];
 int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
+int root;
+int point[N];
+void init(){
+    counter =1 ;
+    for(int i = 0;i<N;i++) {
+        adj[i].clear();
+        disc[i] = low[i]= color[i]= visited[i] = point[i] = 0;
+    }
+}
+int artpoint(int s,int p) {
+    disc[s]=low[s]=counter++;  ///discovery time and lowest back edge extension
+    color[s]=gray;
+    int child=0; ///only for root.
     for(int i=0; i<adj[s].size(); i++) {
         int t=adj[s][i];
-        if(t==p)
+        if(t==p)  ///don't go to parent
             continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
+        if(color[t]==white) {   ///Tree Edge
+            child++;
+            artpoint(t,s);
+            if(s==root&&child>1) {  ///for root articulation point is different case
+                if(!visited[s])
+                    point[s] = 1;
+                visited[s]=1;
             }
-
+            if(disc[s]<=low[t]&&s!=root) {
+                if(!visited[s])
+                    point[s] = 1;
+                visited[s]=1;
+            }
             low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
+        } else if(color[t]==gray) {         ///Back Edge
             low[s]=min(low[s],disc[t]);
-
+        }
     }
 
 }
-int root; /// make root different for every different component
+unsigned ll cnt = 0;
+int cutReach = 0;
+set<int> st;
 void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
+    cnt++;
+    visited[u] =1 ;
+    for(int i = 0;i<adj[u].size();i++){
+        if(point[adj[u][i]]==1) {
+            st.insert(adj[u][i]);
+        }
+        if(visited[adj[u][i]]==0&&point[adj[u][i]]==0)
+            dfs(adj[u][i]);
 
-    for(int i  = 0;i<adj[u].size();i++) {
-        int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
-        }
     }
 }
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
-    }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
-            }
-        }
-    }
-}
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
-        }
-    }
-}
-int level[N];
-int tot = 0;
-void dfs(int u,int d,int p=-1) {
-    level[u] = d;
-    for(int i= 0;i<bt[u].size();i++) {
-        int v = bt[u][i];
-        if(p==v) continue;
-        tot++;
-        dfs(v,d+1,u);
-    }
+ll nc2(ll n) {
+    return (n*n-n)/2LL;
 }
 int main(){
     #ifdef sayed
@@ -131,35 +114,46 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    int test = nxt();
+    int test = nxt();int cs =1;
     while(test--) {
-        int n = nxt();
-        int m =nxt();
-        for(int i = 0;i<m;i++) {
-            int a= nxt()-1;
-            int b= nxt()-1;
+        int n= nxt();
+        int m  = nxt();
+        for(int i =0;i<m;i++) {
+            int a= nxt();
+            int b= nxt();
             adj[a].pb(b);
             adj[b].pb(a);
         }
-        make_tree(n);
-        //print_bt(n);
-        tot = 0;
-        CLR(level);
-        dfs(0,0);
-        int mx = 0;int node = -1;
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]],node =cycle[i];
-        CLR(level);
-        tot =0;
-        mx =0;
-        dfs(node,0);
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]];
-        //debug(mx,tot,node);
-        printf("%d\n",tot-mx);
-        for(int i =0;i<n;i++) adj[i].clear();
+        for(int i = 0;i<n;i++) if(!color[i]){
+            root= i;
+            artpoint(i,-1);
 
+        }
+        unsigned ll ans = 1;
+        CLR(visited);
+        int c= 0;
+        for(int i = 0;i<n;i++) {
+            cnt = 0;cutReach = 0;
+            st.clear();
+            if(!(visited[i]==1||point[i]==1)){
+                dfs(i);
+                cutReach = st.size();
+                if(cutReach==0) ans+=nc2(cnt)-1,c++;
+                else if(cutReach==1)
+                    ans*=cnt;
+                else {
+                    continue;
+                }
+                c++;
+            }
+
+        }
+
+        printf("Case %d: %d %llu\n",cs++,c,ans);
+        init();
 
     }
 
-
     return 0;
 }
+

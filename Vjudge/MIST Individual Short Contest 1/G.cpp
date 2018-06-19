@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               200010
+#define        N                               205
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,84 +46,30 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
-int disc[N],low[N],color[N],visited[N];
-int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
-    for(int i=0; i<adj[s].size(); i++) {
-        int t=adj[s][i];
-        if(t==p)
+
+multiset<int> adj[N];
+vector<int> euler_cycle; /// 0 based node
+multiset<pii> st;
+map<pii,int> mp;
+map<pii,int> extra;
+int deg[N];
+int vis[N];
+void find_cycle(int u) {
+    vis[u] = 1;
+    while(adj[u].size()) {
+        int it = *adj[u].begin();
+        if(mp[make_pair(u,it)]==0) {
+            adj[u].erase(adj[u].find(it));
+            adj[it].erase(adj[it].find(u));
             continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
-            }
-
-            low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
-            low[s]=min(low[s],disc[t]);
-
-    }
-
-}
-int root; /// make root different for every different component
-void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
-
-    for(int i  = 0;i<adj[u].size();i++) {
-        int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
         }
+        mp[make_pair(u,it)]--;
+        mp[make_pair(it,u)]--;
+        find_cycle(it);
     }
+    euler_cycle.pb(u);
 }
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
-    }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
-            }
-        }
-    }
-}
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
-        }
-    }
-}
-int level[N];
-int tot = 0;
-void dfs(int u,int d,int p=-1) {
-    level[u] = d;
-    for(int i= 0;i<bt[u].size();i++) {
-        int v = bt[u][i];
-        if(p==v) continue;
-        tot++;
-        dfs(v,d+1,u);
-    }
-}
+vector<pii> edge;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -133,30 +79,61 @@ int main(){
     //cin.tie(0);
     int test = nxt();
     while(test--) {
-        int n = nxt();
-        int m =nxt();
+        int n= nxt();
+        int m = nxt();
+        int cnt = 0;
         for(int i = 0;i<m;i++) {
-            int a= nxt()-1;
-            int b= nxt()-1;
-            adj[a].pb(b);
-            adj[b].pb(a);
+            int a= nxt();
+            int b = nxt();
+            a--,b--;
+            adj[a].insert(b);
+            adj[b].insert(a);
+            edge.pb(make_pair(a,b));
+            mp[make_pair(a,b)]++;
+            mp[make_pair(b,a)]++;
+            deg[a]++;
+            deg[b]++;
         }
-        make_tree(n);
-        //print_bt(n);
-        tot = 0;
-        CLR(level);
-        dfs(0,0);
-        int mx = 0;int node = -1;
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]],node =cycle[i];
-        CLR(level);
-        tot =0;
-        mx =0;
-        dfs(node,0);
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]];
-        //debug(mx,tot,node);
-        printf("%d\n",tot-mx);
-        for(int i =0;i<n;i++) adj[i].clear();
+        vector<int> odd;
 
+        for(int i =0;i<n;i++){
+            if(deg[i]%2) odd.pb(i);
+            else cnt++;
+        }
+        for(int i = 0;i+2-1<odd.size();i+=2) {
+            int a = odd[i];
+            int b= odd[i+1];
+            mp[make_pair(a,b)]++;
+            mp[make_pair(b,a)]++;
+            adj[a].insert(b);
+            adj[b].insert(a);
+        }
+        printf("%d\n",cnt);
+        for(int i =0;i<n;i++) {
+            if(!vis[i]) find_cycle(i);
+        }
+        reverse(ALL(euler_cycle));
+        for(int i =0 ;i+2-1<euler_cycle.size();i++){
+            int a= euler_cycle[i];
+            int b = euler_cycle[i+1];
+            debug(a,b);
+            extra[make_pair(a,b)] = 1;
+        }
+        for(int i = 0;i<edge.size();i++) {
+            if(extra.count(make_pair(edge[i].ff,edge[i].ss))){
+                printf("%d %d\n",edge[i].ff+1,edge[i].ss+1);
+            } else {
+                printf("%d %d\n",edge[i].ss+1,edge[i].ff+1);
+            }
+        }
+        for(int i= 0;i<N;i++) adj[i].clear();
+        CLR(deg);
+        st.clear();
+        extra.clear();
+        euler_cycle.clear();
+        mp.clear();
+        CLR(vis);
+        edge.clear();
 
     }
 

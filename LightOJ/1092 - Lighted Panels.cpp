@@ -46,118 +46,91 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
-int disc[N],low[N],color[N],visited[N];
-int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
-    for(int i=0; i<adj[s].size(); i++) {
-        int t=adj[s][i];
-        if(t==p)
-            continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
-            }
-
-            low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
-            low[s]=min(low[s],disc[t]);
-
-    }
-
+int grid[10][10];
+int n,m;
+bool isvalid(int i,int j) {
+    if(i>=0&&i<n&&j>=0&&j<m) return true;
+    return false;
 }
-int root; /// make root different for every different component
-void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
-
-    for(int i  = 0;i<adj[u].size();i++) {
-        int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
-        }
-    }
-}
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
-    }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
+int go(int rowMask,int colMask) {
+    int cnt = 0;
+    int ar[10][10];
+    for(int i =0;i<n;i++) for(int j =0;j<m;j++) ar[i][j] = grid[i][j];
+    for(int i = 0;i<n;i++) {
+        if(ison(rowMask,i)) {
+            cnt++;
+            ar[i][0]^=1;
+            for(int j = 0;j<8;j++) {
+                if(isvalid(i+dx[j],0+dy[j])) {
+                    ar[i+dx[j]][0+dy[j]]^=1;
+                }
             }
         }
     }
-}
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
+
+      for(int i = 0;i<m;i++) {
+        if(ison(colMask,i)) {
+            cnt++;
+            ar[0][i]^=1;
+            for(int j = 0;j<8;j++) {
+                if(isvalid(0+dx[j],i+dy[j])) {
+                    ar[0+dx[j]][i+dy[j]]^=1;
+                }
+            }
         }
     }
-}
-int level[N];
-int tot = 0;
-void dfs(int u,int d,int p=-1) {
-    level[u] = d;
-    for(int i= 0;i<bt[u].size();i++) {
-        int v = bt[u][i];
-        if(p==v) continue;
-        tot++;
-        dfs(v,d+1,u);
+    for(int i = 1;i<n;i++) {
+        for(int j = 1;j<m;j++) {
+            if(ar[i-1][j-1]==0) {
+                ar[i][j]^=1;
+                cnt++;
+                for(int k = 0;k<8;k++) {
+                    if(isvalid(i+dx[k],j+dy[k])) {
+                        ar[i+dx[k]][j+dy[k]]^=1;
+                    }
+                }
+            }
+        }
     }
+    for(int i =0;i<n;i++) {
+        for(int j =0;j<m;j++) {
+            if(ar[i][j]==0) return inf;
+        }
+    }
+    return cnt;
 }
 int main(){
     #ifdef sayed
-    //freopen("out.txt","w",stdout);
+    freopen("out.txt","w",stdout);
     // freopen("in.txt","r",stdin);
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    int test = nxt();
+    int test =nxt();
+    int cs = 1;
     while(test--) {
-        int n = nxt();
-        int m =nxt();
-        for(int i = 0;i<m;i++) {
-            int a= nxt()-1;
-            int b= nxt()-1;
-            adj[a].pb(b);
-            adj[b].pb(a);
+        n =nxt();
+        m = nxt();
+        CLR(grid);
+        for(int i = 0;i<n;i++){
+            char t[10];
+            scanf("%s",t);
+            int len = strlen(t);
+            for(int j = 0;j<len;j++) {
+                if(t[j]=='.') grid[i][j]=0;
+                else grid[i][j] = 1;
+            }
         }
-        make_tree(n);
-        //print_bt(n);
-        tot = 0;
-        CLR(level);
-        dfs(0,0);
-        int mx = 0;int node = -1;
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]],node =cycle[i];
-        CLR(level);
-        tot =0;
-        mx =0;
-        dfs(node,0);
-        for(int i =0;i<n;i++) if(level[cycle[i]]>mx) mx = level[cycle[i]];
-        //debug(mx,tot,node);
-        printf("%d\n",tot-mx);
-        for(int i =0;i<n;i++) adj[i].clear();
-
-
+        int res = inf;
+        for(int i = 0;i<(1<<n);i++) {
+            for(int j = 0;j<(1<<m);j++) {
+              //  debug(i,j);
+                res =min(res,go(i,j));
+            }
+        }
+        printf("Case %d: ",cs++);
+        if(res==inf) printf("impossible\n");
+        else printf("%d\n",res);
     }
 
 

@@ -46,84 +46,72 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
-int disc[N],low[N],color[N],visited[N];
-int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
-    for(int i=0; i<adj[s].size(); i++) {
-        int t=adj[s][i];
-        if(t==p)
-            continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
-            }
-
-            low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
-            low[s]=min(low[s],disc[t]);
-
-    }
-
-}
-int root; /// root of every component
-void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
-
-    for(int i  = 0;i<adj[u].size();i++) {
+int subtree[N];
+int del[N];
+vector<int> adj[N];
+vector<int> centroid_tree[N];
+int root;      /// 0 based node
+int total_node = 0;
+void dfs(int u,int p = -1) {
+    subtree[u] = 1;
+    total_node++;
+    for(int i = 0;i<adj[u].size();i++){
         int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
-        }
+        if(del[v]||v==p) continue;
+        dfs(v,u);
+        subtree[u] += subtree[v];
     }
 }
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
+int GetCenter(int u,int p=-1){
+    for(int i = 0;i<adj[u].size();i++) {
+        int v = adj[u][i];
+        if(del[v]||v==p) continue;
+        if(subtree[v]>total_node/2) return GetCenter(v,u);
     }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
-            }
-        }
+    return u;
+}
+
+void decompose(int u,int p = -1) {
+    del[u] = 1;
+    for(int i = 0;i<adj[u].size();i++){
+        int v = adj[u][i];
+        if(del[v]||v==p)  continue;
+        total_node = 0;
+        dfs(v);
+        int c = GetCenter(v);
+        centroid_tree[u].pb(c);
+        centroid_tree[c].pb(u);
+        decompose(c,u);
     }
 }
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
-        }
+void decompose_tree(int n){
+    CLR(subtree);
+    CLR(del);
+    for(int i = 0;i<n;i++) centroid_tree[i].clear();
+    dfs(0);
+    root = GetCenter(0);
+    decompose(root);
+}
+
+int parent[N];
+void dfs1(int u,int p=-1) {
+    parent[u] = p;
+    for(auto it : centroid_tree[u]) {
+        if(it==p) continue;
+        dfs1(it,u);
     }
 }
 
 int table[32][N];  ///for sparse  table
 int depth[N];     ///depth of each node from root
-int parent[N];
+int par[N];
 void dfs(int s,int p,int d){
-       parent[s]=p;
-       depth[s]=d;
-      for(int i=0;i<bt[s].size();i++){
-         int t=bt[s][i];
-         if(t==p) continue;
-          dfs(t,s,d+1);
+    par[s]=p;
+    depth[s]=d;
+    for(int i=0;i<adj[s].size();i++){
+        int t=adj[s][i];
+        if(t==p) continue;
+        dfs(t,s,d+1);
       }
 
 
@@ -131,7 +119,7 @@ void dfs(int s,int p,int d){
 void lca_init(int n){
    SET(table);
    for(int i=0;i<n;i++){
-      table[0][i]=parent[i];
+      table[0][i]=par[i];
     }
     for(int i=1;(1<<i)<n;i++){
          for(int j=0;j<n;j++){
@@ -147,17 +135,39 @@ int lca_query(int p,int q){  ///p && q are two nodes.
     int log=1;
     while((1<<log)<depth[p]) log++;
     for(int i=log;i>=0;i--){
-        if(depth[p]-(1<<i)>=depth[q])  ///making same level of p and q
-            p=table[i][p];
-    }
+           if(depth[p]-(1<<i)>=depth[q])  ///making same level of p and q
+                  p=table[i][p];
+
+        }
     if(p==q)
           return p;
     for(int i=log;i>=0;i--){
         if(table[i][p]!=-1&&table[i][p]!=table[i][q])
-            p=table[i][p],q=table[i][q];
+               p=table[i][p],q=table[i][q];
     }
-    return parent[p];
+    return par[p];
 
+}
+int dist(int a,int b) {
+    return depth[a]+depth[b]- 2*depth[lca_query(a,b)];
+}
+bool ispaint[N];
+set<pii>ans[N];
+int node;
+void paint(int u){
+    if(u==-1) return ;
+    ans[u].insert(make_pair(dist(u,node),node));
+    paint(parent[u]);
+}
+void reverse_paint(int u){
+    if(u==-1) return ;
+    ans[u].erase(ans[u].find(make_pair(dist(node,u),node)));
+    reverse_paint(parent[u]);
+}
+int query(int u,int res) {
+    if(u==-1) return res;
+    auto it = *ans[u].begin();
+    return query(parent[u],min(res,it.ff+dist(node,u)));
 }
 
 int main(){
@@ -167,29 +177,38 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-     int n =nxt();
-    int m = nxt();
-    for(int i =0;i<m;i++) {
+    int n = nxt();
+    for(int i =0;i<n-1;i++) {
         int a= nxt();
-        int b= nxt();
-        a--,b--;
+        int b=nxt();
+        a--;
+        b--;
         adj[a].pb(b);
         adj[b].pb(a);
     }
-    make_tree(n);
-    SET(parent);
+    for(int i =0;i<n;i++) ans[i].insert(make_pair(inf,i)),parent[i]=-1;
+    decompose_tree(n);
     dfs(0,-1,1);
     lca_init(n);
-
-    int q = nxt();
+    dfs1(root);
+    int q =nxt();
     while(q--) {
-        int a= nxt();
-        int b= nxt();
-        a--;
-        b--;
-        a = cycle[a];
-        b = cycle[b];
-        printf("%d\n",depth[a]+depth[b]-2*depth[lca_query(a,b)]);
+        int t = nxt();
+        node = nxt();
+        node--;
+        if(t==0) {
+            if(ispaint[node]) {
+                ispaint[node] =0;
+                reverse_paint(node);
+            } else {
+                ispaint[node] = 1;
+                paint(node);
+            }
+        } else {
+            int val = query(node,inf);
+            if(val>=inf) printf("-1\n");
+            else printf("%d\n",val);
+        }
     }
 
     return 0;

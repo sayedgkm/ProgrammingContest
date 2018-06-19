@@ -46,82 +46,100 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> adj[N],bt[N];
-int disc[N],low[N],color[N],visited[N];
-int counter=1;
-int cycle[N];
-multiset<pii> B;
-void Bridge(int s,int p) {
-    disc[s]=low[s]=counter++;
-    color[s]=1;
-    for(int i=0; i<adj[s].size(); i++) {
-        int t=adj[s][i];
-        if(t==p)
-            continue;
-        if(!color[t]) {
-            Bridge(t,s);
-            if(disc[s]<low[t]){
-                int x = min(s,t);
-                int y = max(s,t);
-                B.insert(make_pair(x,y));
+int disc[N], low[N], parent[N], ap[N];
+int node[N], cut[N];
+vector<int> A[N], BC[N];
+stack< pair<int, int> >_stack;
+vector<int> _temp;
+int NN;
+
+void extract_biconnected_component(int u = -1, int v = -1)
+{
+    int id = NN++;
+    _temp.clear();
+
+    while (!_stack.empty())
+    {
+         pair<int, int>  t = _stack.top();
+        _stack.pop();
+        _temp.push_back(t.first), _temp.push_back(t.second);
+        if (t == make_pair(u, v)) break;
+    }
+
+    sort(_temp.begin(), _temp.end());
+    _temp.erase(unique(_temp.begin(), _temp.end()), _temp.end());
+
+    for (int i=0; i<_temp.size(); i++)
+    {
+        int u = _temp[i];
+        if (ap[u])
+        {
+            if (node[u] == -1) node[u] = NN++;
+            cut[node[u]] = true;
+            BC[node[u]].push_back(id);
+            BC[id].push_back(node[u]);
+        }
+        else node[u] = id;
+    }
+}
+
+void dfs_visit(int u)
+{
+    static int time = 0;
+    int children = 0;
+
+    disc[u] = low[u] = ++time;
+
+    for (int i=0; i<A[u].size(); i++)
+    {
+        int v = A[u][i];
+        if (disc[v] == -1)
+        {
+            _stack.push(make_pair(u, v));
+            children++;
+            parent[v] = u;
+            dfs_visit(v);
+
+            low[u]  = min(low[u], low[v]);
+            if ((parent[u] == -1 && children > 1) || (parent[u] != -1 && low[v] >= disc[u]))
+            {
+                ap[u] = true;
+                extract_biconnected_component(u, v);
             }
-
-            low[s]=min(low[s],low[t]);
-        } else               ///Back Edge
-            low[s]=min(low[s],disc[t]);
-
-    }
-
-}
-int root; /// root of every component
-void dfs(int u) {
-    visited[u]  = 1;
-    cycle[u] = root;
-
-    for(int i  = 0;i<adj[u].size();i++) {
-        int v = adj[u][i];
-        int x = min(u,v);
-        int y = max(u,v);
-        if(B.find(make_pair(x,y))!=B.end()) continue;
-        if(!visited[v]) {
-            dfs(v);
+        }
+        else if (v != parent[u] && disc[v] < disc[u])
+        {
+            _stack.push(make_pair(u, v));
+            low[u]  = min(low[u], disc[v]);
         }
     }
-}
-int make_tree(int n) {
-    CLR(visited);CLR(color);CLR(disc);CLR(low);CLR(cycle);
-    B.clear();
-    counter = 1;
-    for(int i =0;i<N;i++) bt[i].clear();
-    for(int i =0;i<n;i++){
-        if(!color[i]) Bridge(i,-1);
-    }
-    for(int i = 0;i<n;i++) if(!visited[i]) root= i,dfs(i);
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<adj[i].size();j++) {
-            int v = adj[i][j];
-            if(cycle[i]!=cycle[v]) {
-                bt[cycle[i]].pb(cycle[v]);
-            }
-        }
-    }
-}
-void print_bt(int n) {
-    for(int i =0;i<n;i++) {
-        for(int j =0;j<bt[i].size();j++) {
-            printf("%d %d\n",i+1,bt[i][j]+1);
-        }
-    }
+
+    if (parent[u] == -1) extract_biconnected_component();
 }
 
+void block_cut(int n)
+{
+    int i, j, k;
+    NN = 0;
+    for (i=0; i<n; i++) {
+        disc[i] = -1;
+        ap[i] = 0;
+        parent[i] = -1;
+        node[i] = -1;
+        cut[i] = 0;
+    }
+    for (i=0; i<n; i++) if (disc[i] == -1) dfs_visit(i);
+}
 int table[32][N];  ///for sparse  table
 int depth[N];     ///depth of each node from root
-int parent[N];
+int par[N];
+int visited[N];
 void dfs(int s,int p,int d){
-       parent[s]=p;
+       par[s]=p;
+       visited[s] = 1;
        depth[s]=d;
-      for(int i=0;i<bt[s].size();i++){
-         int t=bt[s][i];
+      for(int i=0;i<BC[s].size();i++){
+         int t=BC[s][i];
          if(t==p) continue;
           dfs(t,s,d+1);
       }
@@ -130,8 +148,9 @@ void dfs(int s,int p,int d){
 }
 void lca_init(int n){
    SET(table);
+
    for(int i=0;i<n;i++){
-      table[0][i]=parent[i];
+      table[0][i]=par[i];
     }
     for(int i=1;(1<<i)<n;i++){
          for(int j=0;j<n;j++){
@@ -156,10 +175,17 @@ int lca_query(int p,int q){  ///p && q are two nodes.
         if(table[i][p]!=-1&&table[i][p]!=table[i][q])
             p=table[i][p],q=table[i][q];
     }
-    return parent[p];
+    return par[p];
 
 }
-
+vector<pii> edge;
+int go(int a,int b) {
+    a = node[a];
+    b = node[b];
+    int res =(depth[a]+depth[b]-2*depth[lca_query(a,b)])/2;
+    if(cut[a]&&cut[b]) res--;
+        return res;
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -167,30 +193,43 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-     int n =nxt();
-    int m = nxt();
-    for(int i =0;i<m;i++) {
-        int a= nxt();
-        int b= nxt();
-        a--,b--;
-        adj[a].pb(b);
-        adj[b].pb(a);
-    }
-    make_tree(n);
-    SET(parent);
-    dfs(0,-1,1);
-    lca_init(n);
+    while(1) {
+        int n =nxt();
+        int m = nxt();
+        if(!n&&!m) break;
+        for(int i= 0;i<m;i++) {
+            int a= nxt()-1;
+            int b= nxt()-1;
+            A[a].pb(b);
+            A[b].pb(a);
+            edge.pb(make_pair(a,b));
+        }
+        block_cut(n);
+        for(int i = 0;i<NN;i++) {
+            if(!visited[i]) dfs(i,-1,0);
+        }
+        lca_init(NN);
 
-    int q = nxt();
-    while(q--) {
-        int a= nxt();
-        int b= nxt();
-        a--;
-        b--;
-        a = cycle[a];
-        b = cycle[b];
-        printf("%d\n",depth[a]+depth[b]-2*depth[lca_query(a,b)]);
+        int q =  nxt();
+        while(q--) {
+            int a= nxt()-1;
+            int b= nxt()-1;
+            int res = 0;
+            res = max(res,go(edge[a].ff,edge[b].ff));
+            res = max(res,go(edge[a].ff,edge[b].ss));
+            res = max(res,go(edge[a].ss,edge[b].ff));
+            res = max(res,go(edge[a].ss,edge[b].ss));
+            printf("%d\n",res);
+
+        }
+        edge.clear();
+        FOR(i,0,n+1) A[i].clear(),BC[i].clear();
+        SET(par);
+        CLR(depth);
+        CLR(visited);
+
     }
+
 
     return 0;
 }
