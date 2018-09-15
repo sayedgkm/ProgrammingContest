@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               3002
+#define        N                               1000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,38 +46,43 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> v[N][N];
-vector<int> adj[N];
-int level[N][N];
-int n;
-pii par[N][N];
-int bfs(pii &last) {
-    queue<pii> q;
-    q.push(make_pair(0,3001));
-    level[0][3001]=0;
-    while(!q.empty()) {
 
-        pii u= q.front();
-        if(u.ff==n-1) {
-            last = u;
-            return level[u.ff][u.ss];
-        }
-        q.pop();
-        for(auto it : adj[u.ff]) {
-            if(binary_search(ALL(v[u.ss][u.ff]),it)) continue;
-            if(level[it][u.ff]==-1) {
-                level[it][u.ff]=level[u.ff][u.ss]+1;
-                par[it][u.ff]= u;
-                q.push(make_pair(it,u.ff));
-            }
-        }
-    }
-    return -1;
+int ar[1005][1005];
+int x= 0;
+int n ,m;
+int get(int x,int k) {
+    if(x==0) return 0;
+    else if(x==n*m+1) return 2*((n-1)*(m-1))+1;
+    return k+((x-1)*2);
 }
-void dfs(pii last) {
-    if(last.ss!=3001)
-        dfs(par[last.ff][last.ss]);
-    printf("%d ",1+last.ff);
+int rectangle(int i,int j) {
+    if(i==1||j==m) return 0;
+    else if(i==n+1||j==0) return (n*m)+1;
+    else {
+        return (i-2)*(m-1)+j;
+    }
+}
+vector<pll> adj[N];
+ll level[N];
+int dijkstra(int st) {
+    int dest =2*((n-1)*(m-1))+1;
+    for(int i = 0;i<=dest;i++) level[i] = (ll)3e17;
+    level[0] = 0;
+    priority_queue<pii> pq;
+    pq.push(make_pair(-level[0],0));
+    while(!pq.empty()) {
+        pii top = pq.top();
+        if(top.ss==dest) return -top.ff;
+        pq.pop();
+        for(auto it : adj[top.ss]) {
+            if(level[top.ss]+it.ss<level[it.ff]) {
+               level[it.ff]=(ll)level[top.ss]+it.ss;
+               pq.push(make_pair(-level[it.ff],it.ff));
+            }
+
+        }
+
+    }
 }
 int main(){
     #ifdef sayed
@@ -86,31 +91,51 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n = nxt();
-    int m = nxt();
-    int q=nxt();
-    for(int i = 0;i<m;i++){
-        int a= nxt()-1;
-        int b=nxt()-1;
-        adj[a].pb(b);
-        adj[b].pb(a);
+    int cs  = 1;
+    while(1) {
+
+
+        scanf("%d %d",&n,&m);
+        if(!n&&!m) break;
+
+        for(int i = 1;i<=n;i++) {
+            for(int j = 1;j<m;j++) {
+                int a= nxt();
+                int up = rectangle(i,j);
+                int down = rectangle(i+1,j);
+                int x= get(up,2);
+                int y =get(down,1);
+                adj[x].pb(make_pair(y,a));
+                adj[y].pb(make_pair(x,a));
+            }
+        }
+        for(int i =1;i<n;i++) {
+            for(int j = 1;j<=m;j++) {
+                int a= nxt();
+                int Left = rectangle(i+1,j-1);
+                int Right = rectangle(i+1,j);
+                int x= get(Left,1);
+                int y = get(Right,2);
+                 adj[x].pb(make_pair(y,a));
+                adj[y].pb(make_pair(x,a));
+            }
+        }
+        for(int i = 1;i<n;i++) {
+            for(int j = 1;j<m;j++) {
+                int a= nxt();
+                int no =rectangle(i+1,j);
+                int x = get(no,1);
+                int y= get(no,2);
+                 adj[x].pb(make_pair(y,a));
+                adj[y].pb(make_pair(x,a));
+
+            }
+        }
+       printf("Case %d: Minimum = %d\n",cs++,dijkstra(0));
+       FOR(i,0,N) adj[i].clear();
     }
-    for(int i =0;i<q;i++) {
-        int a = nxt()-1;
-        int b= nxt()-1;
-        int c= nxt()-1;
-        v[a][b].pb(c);
-    }
-    for(int i = 0;i<n;i++){
-        for(int j = 0;j<n;j++) sort(ALL(v[i][j]));
-    }
-    SET(level);
-    pii last;
-    int res = bfs(last);
-    if(res!=-1) {
-        cout<<res<<endl;
-        dfs(last);
-    } else cout<<-1<<endl;
+
+
     return 0;
 }
 

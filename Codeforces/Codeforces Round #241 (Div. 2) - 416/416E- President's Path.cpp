@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               3002
+#define        N                               505
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,38 +46,41 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> v[N][N];
-vector<int> adj[N];
-int level[N][N];
-int n;
-pii par[N][N];
-int bfs(pii &last) {
-    queue<pii> q;
-    q.push(make_pair(0,3001));
-    level[0][3001]=0;
-    while(!q.empty()) {
 
-        pii u= q.front();
-        if(u.ff==n-1) {
-            last = u;
-            return level[u.ff][u.ss];
-        }
-        q.pop();
-        for(auto it : adj[u.ff]) {
-            if(binary_search(ALL(v[u.ss][u.ff]),it)) continue;
-            if(level[it][u.ff]==-1) {
-                level[it][u.ff]=level[u.ff][u.ss]+1;
-                par[it][u.ff]= u;
-                q.push(make_pair(it,u.ff));
+vector<pii> adj[N];
+int level[N][N];
+vector<tuple < int,int,int >  > edge;
+void dijsktra(int s) {
+    for(int i =0;i<N;i++) level[s][i] = inf;
+    level[s][s] = 0;
+    priority_queue<pii> pq;
+    pq.push(make_pair(0,s));
+    while(!pq.empty()) {
+        pii top = pq.top();pq.pop();
+        for(auto it: adj[top.ss]) {
+            if(level[s][top.ss]+it.ss<level[s][it.ff]) {
+               level[s][it.ff] =level[s][top.ss]+it.ss;
+               pq.push(make_pair(-level[s][it.ff],it.ff));
             }
         }
     }
-    return -1;
 }
-void dfs(pii last) {
-    if(last.ss!=3001)
-        dfs(par[last.ff][last.ss]);
-    printf("%d ",1+last.ff);
+int n;
+int ans[N][N];
+int Edge[N][N];
+void calculate(int s) {
+
+    for(auto it : edge) {
+        int a = get<0> (it);
+        int b = get<1> (it);
+        int c = get<2> (it);
+        if(level[s][a]+c==level[s][b]) {
+            Edge[s][b]++;
+        }
+        if(level[s][b]+c==level[s][a]) {
+            Edge[s][a]++;
+        }
+    }
 }
 int main(){
     #ifdef sayed
@@ -86,31 +89,34 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n = nxt();
-    int m = nxt();
-    int q=nxt();
+    FOR(i,0,N) FOR(j,0,N) level[i][j]=inf,level[i][i]=0;
+    n =nxt();
+    int m =nxt();
     for(int i = 0;i<m;i++){
-        int a= nxt()-1;
-        int b=nxt()-1;
-        adj[a].pb(b);
-        adj[b].pb(a);
+        int a= nxt();
+        int b= nxt();
+        a--,b--;
+        int c= nxt();
+        edge.pb(make_tuple(a,b,c));
+        level[a][b]= c;
+        level[b][a]= c;
     }
-    for(int i =0;i<q;i++) {
-        int a = nxt()-1;
-        int b= nxt()-1;
-        int c= nxt()-1;
-        v[a][b].pb(c);
+    FOR(k,0,n) FOR(i,0,n)FOR(j,0,n) level[i][j]=min(level[i][j],level[i][k]+level[k][j]);
+    for(int i = 0;i<n;i++) {
+        calculate(i);
     }
-    for(int i = 0;i<n;i++){
-        for(int j = 0;j<n;j++) sort(ALL(v[i][j]));
+    for(int i = 0;i<n;i++) {
+        for(int j = i+1;j<n;j++) {
+            int res = 0;
+            for(int k = 0;k<n;k++) {
+                if(level[i][j]==level[i][k]+level[k][j]) res+=Edge[i][k];
+            }
+            printf("%d ",res);
+        }
     }
-    SET(level);
-    pii last;
-    int res = bfs(last);
-    if(res!=-1) {
-        cout<<res<<endl;
-        dfs(last);
-    } else cout<<-1<<endl;
+
+    printf("\n");
+
     return 0;
 }
 

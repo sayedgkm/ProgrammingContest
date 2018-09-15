@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               3002
+#define        N                               505*2
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,38 +46,87 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> v[N][N];
-vector<int> adj[N];
-int level[N][N];
+int ar[N];
+string s,t;
+int p;
 int n;
-pii par[N][N];
-int bfs(pii &last) {
-    queue<pii> q;
-    q.push(make_pair(0,3001));
-    level[0][3001]=0;
-    while(!q.empty()) {
 
-        pii u= q.front();
-        if(u.ff==n-1) {
-            last = u;
-            return level[u.ff][u.ss];
-        }
-        q.pop();
-        for(auto it : adj[u.ff]) {
-            if(binary_search(ALL(v[u.ss][u.ff]),it)) continue;
-            if(level[it][u.ff]==-1) {
-                level[it][u.ff]=level[u.ff][u.ss]+1;
-                par[it][u.ff]= u;
-                q.push(make_pair(it,u.ff));
-            }
+const ll INF=(ll)1<<60;
+struct Edge{
+	ll from,to,cap,flow,cost;
+	Edge(int from,int to,int cap,int flow,int cost):from(from),to(to),cap(cap),flow(flow),cost(cost) {}
+};
+namespace mcmf{
+	int n,m,s,t;
+	vector<Edge> edges;
+	vector<ll> G[N];
+	bool inq[N];
+	ll d[N],p[N],a[N];                     /// N = Size of nodes in flow network
+	void init(int src,int sink,int node)
+	{
+		n=node;
+		s= src;
+		t = sink;
+		edges.clear();
+		for(int i=0;i<=n;++i) G[i].clear();
+	}
+	void addEdge(int from,int to,ll cap,ll cost)
+	{
+		edges.push_back(Edge(from,to,cap,0,cost));
+		edges.push_back(Edge(to,from,0,0,-cost));
+		m=edges.size();
+		G[from].push_back(m-2);
+		G[to].push_back(m-1);
+	}
+	bool spfa(ll &flow,ll& cost)
+	{
+		for(int i=0;i<=n;++i) d[i]=INF,inq[i]=0;
+		queue<int> que;
+		que.push(s);
+		inq[s]=1;d[s]=0;p[s]=0;a[s]=INF;
+		while(!que.empty())
+		{
+			int x=que.front();que.pop();
+			inq[x]=0;
+			for(int i=0;i<G[x].size();++i)
+			{
+				Edge &e=edges[G[x][i]];
+				if(e.cap>e.flow && d[e.to]>d[x]+e.cost)
+				{
+					d[e.to]=d[x]+e.cost;
+					p[e.to]=G[x][i];
+					a[e.to]=min(a[x],e.cap-e.flow);
+					if(!inq[e.to]) inq[e.to]=1,que.push(e.to);
+				}
+			}
+		}
+		if(d[t]==INF) return 0;
+		flow+=a[t];
+		cost+=d[t];    /// multiply by d[t]*a[t] if per unit cost is given.
+		int u=t;
+		while(u!=s)
+		{
+			edges[p[u]].flow+=a[t];
+			edges[p[u]^1].flow-=a[t];
+			u=edges[p[u]].from;
+		}
+		return 1;
+	}
+	pll solve()
+	{
+		ll flow=0,cost=0;
+		while(spfa(flow,cost));
+		return make_pair(cost,flow);
+	}
+}
+void make(){
+
+    for(int i= 0;i+t.size()-1<n;i++) {
+        if(s.substr(i,t.size())==t) {
+            debug(i,i+t.size(),1,-p);
+            mcmf::addEdge(i,i+t.size(),1,-p);
         }
     }
-    return -1;
-}
-void dfs(pii last) {
-    if(last.ss!=3001)
-        dfs(par[last.ff][last.ss]);
-    printf("%d ",1+last.ff);
 }
 int main(){
     #ifdef sayed
@@ -86,31 +135,24 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n = nxt();
-    int m = nxt();
-    int q=nxt();
-    for(int i = 0;i<m;i++){
-        int a= nxt()-1;
-        int b=nxt()-1;
-        adj[a].pb(b);
-        adj[b].pb(a);
+    cin>>n;
+    cin>>s;
+    int q;
+    cin>>q;
+    mcmf::init(n+1,n+2,n+3);
+    for(int i  = 0;i<q;i++) {
+        cin>>t>>p;
+        make();
     }
-    for(int i =0;i<q;i++) {
-        int a = nxt()-1;
-        int b= nxt()-1;
-        int c= nxt()-1;
-        v[a][b].pb(c);
+    int x= nxt();
+    for(int i =0;i<n;i++) {
+        mcmf::addEdge(i,i+1,x,0);
     }
-    for(int i = 0;i<n;i++){
-        for(int j = 0;j<n;j++) sort(ALL(v[i][j]));
-    }
-    SET(level);
-    pii last;
-    int res = bfs(last);
-    if(res!=-1) {
-        cout<<res<<endl;
-        dfs(last);
-    } else cout<<-1<<endl;
+    mcmf::addEdge(n+1,0,x,0);
+    mcmf::addEdge(n,n+2,x,0);
+
+    printf("%lld\n",-mcmf::solve().ff);
+
     return 0;
 }
 

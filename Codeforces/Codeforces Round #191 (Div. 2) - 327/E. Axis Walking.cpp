@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               3002
+#define        N                               1000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,39 +46,11 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> v[N][N];
-vector<int> adj[N];
-int level[N][N];
-int n;
-pii par[N][N];
-int bfs(pii &last) {
-    queue<pii> q;
-    q.push(make_pair(0,3001));
-    level[0][3001]=0;
-    while(!q.empty()) {
-
-        pii u= q.front();
-        if(u.ff==n-1) {
-            last = u;
-            return level[u.ff][u.ss];
-        }
-        q.pop();
-        for(auto it : adj[u.ff]) {
-            if(binary_search(ALL(v[u.ss][u.ff]),it)) continue;
-            if(level[it][u.ff]==-1) {
-                level[it][u.ff]=level[u.ff][u.ss]+1;
-                par[it][u.ff]= u;
-                q.push(make_pair(it,u.ff));
-            }
-        }
-    }
-    return -1;
-}
-void dfs(pii last) {
-    if(last.ss!=3001)
-        dfs(par[last.ff][last.ss]);
-    printf("%d ",1+last.ff);
-}
+ll ar[N];
+ll a[3];
+ll already[(1<<24)+10];
+int dp[(1<<24)+10];
+int n,tot;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -86,31 +58,30 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n = nxt();
-    int m = nxt();
-    int q=nxt();
-    for(int i = 0;i<m;i++){
-        int a= nxt()-1;
-        int b=nxt()-1;
-        adj[a].pb(b);
-        adj[b].pb(a);
-    }
-    for(int i =0;i<q;i++) {
-        int a = nxt()-1;
-        int b= nxt()-1;
-        int c= nxt()-1;
-        v[a][b].pb(c);
-    }
+    n =nxt();
+    tot=1<<n;
+    tot--;
     for(int i = 0;i<n;i++){
-        for(int j = 0;j<n;j++) sort(ALL(v[i][j]));
+        ar[i] = lxt();
     }
-    SET(level);
-    pii last;
-    int res = bfs(last);
-    if(res!=-1) {
-        cout<<res<<endl;
-        dfs(last);
-    } else cout<<-1<<endl;
+    int k = nxt();
+    for(int i = 0;i<k;i++) a[i] = lxt();
+    dp[0]=1;
+    for(int i = 1;i<=tot;i++) {
+        int bt = __builtin_ctz(i);
+        ll sum = already[i]=already[i^(1<<bt)]+ar[bt];
+        if(sum==a[0]||sum==a[1]) continue;
+        int tmp = i;
+        while(tmp) {
+            int j = __builtin_ctz(tmp);
+            dp[i]+=dp[i^(1<<j)];
+            if(dp[i]>=M) dp[i]-=M;
+            tmp = bitoff(tmp,j);
+
+        }
+    }
+    printf("%d\n",dp[tot]);
+
     return 0;
 }
 

@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               3002
+#define        N                               1000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,38 +46,52 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> v[N][N];
-vector<int> adj[N];
-int level[N][N];
-int n;
-pii par[N][N];
-int bfs(pii &last) {
-    queue<pii> q;
-    q.push(make_pair(0,3001));
-    level[0][3001]=0;
-    while(!q.empty()) {
+int ar[N];
+vector< tuple < int,int, int> > edge;
+vector<int> adj[5];
+set<int> com[5];
+int comId= 0;
+int color[5]={0};
+int x=-1 , y=-1;
+void dfs(int u) {
+    com[comId].insert(u);
+    color[u] = 1;
+    for(auto it :adj[u]){
+            if((u==x&&it==y)||(u==y&&it==x)) continue;if(!color[it]) dfs(it);
+    }
+}
+set<int> node;
+int deg[5]={0};
+int recal(int a,int b,int c) {
+    CLR(color);
+    com[0].clear();
+    com[1].clear();
+    comId = 0;
+    x = a;
+    y = b;
+    for(auto it : node) {
+        if(!color[it]) dfs(it),comId++;
+    }
+    if(comId==1) return c;
+    int res[2]={0};
+    int cnt = 0;
+    for(auto it : edge) {
 
-        pii u= q.front();
-        if(u.ff==n-1) {
-            last = u;
-            return level[u.ff][u.ss];
-        }
-        q.pop();
-        for(auto it : adj[u.ff]) {
-            if(binary_search(ALL(v[u.ss][u.ff]),it)) continue;
-            if(level[it][u.ff]==-1) {
-                level[it][u.ff]=level[u.ff][u.ss]+1;
-                par[it][u.ff]= u;
-                q.push(make_pair(it,u.ff));
+        int a= get<0> (it);
+        int b= get<1> (it);
+        if(a==x&&y==b) cnt++;
+        if(a==y&&x==b) cnt++;
+        int c= get<2> (it);
+        for(int i = 0;i<comId;i++) {
+            if(com[i].find(a)!=com[i].end()&&com[i].find(b)!=com[i].end()) {
+                res[i]+=c;
+                break;
             }
         }
     }
-    return -1;
-}
-void dfs(pii last) {
-    if(last.ss!=3001)
-        dfs(par[last.ff][last.ss]);
-    printf("%d ",1+last.ff);
+    if(cnt>1) return c;
+    return c+(*min_element(res,res+2));
+
 }
 int main(){
     #ifdef sayed
@@ -86,31 +100,61 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n = nxt();
-    int m = nxt();
-    int q=nxt();
-    for(int i = 0;i<m;i++){
-        int a= nxt()-1;
-        int b=nxt()-1;
+    int n = nxt();
+    ll tot = 0;
+    for(int i = 0;i<n;i++) {
+        int a= nxt();
+        int c= nxt();
+        int b = nxt();
+        deg[a]++;
+        deg[b]++;
+        node.insert(a);
+        node.insert(b);
+        edge.pb(make_tuple(a,b,c));
         adj[a].pb(b);
         adj[b].pb(a);
+        tot+=c;
     }
-    for(int i =0;i<q;i++) {
-        int a = nxt()-1;
-        int b= nxt()-1;
-        int c= nxt()-1;
-        v[a][b].pb(c);
+    for(int i = 1;i<=4;i++)  {
+        if(!color[i]&&node.find(i)!=node.end()) {
+            dfs(i);
+            comId++;
+        }
     }
-    for(int i = 0;i<n;i++){
-        for(int j = 0;j<n;j++) sort(ALL(v[i][j]));
+
+    if(comId==1) { /// handle separately
+        int Minus = inf;
+        if(com[comId-1].size()==4) {
+            int cnt = 0;
+            for(int i = 1;i<=4;i++) {
+                cnt+=deg[i]%2;
+            }
+            debug(cnt);
+            if(cnt==4){ for(auto it : edge) if(get<0>(it)!=get<1>(it)) Minus =  min(Minus , recal(get<0>(it),get<1>(it),get<2> (it)));}
+            else Minus = 0;
+        } else {
+            Minus = 0;
+        }
+        debug(Minus);
+        cout<<tot-Minus<<endl;
+    } else {
+        int res[5]={0};
+        for(auto it : edge) {
+
+            int a= get<0> (it);
+            int b= get<1> (it);
+            int c= get<2> (it);
+            for(int i = 0;i<comId;i++) {
+                if(com[i].find(a)!=com[i].end()&&com[i].find(b)!=com[i].end()) {
+                    res[i]+=c;
+                    break;
+                }
+            }
+        }
+        cout<<*max_element(res,res+5)<<endl;
     }
-    SET(level);
-    pii last;
-    int res = bfs(last);
-    if(res!=-1) {
-        cout<<res<<endl;
-        dfs(last);
-    } else cout<<-1<<endl;
+
+
     return 0;
 }
 

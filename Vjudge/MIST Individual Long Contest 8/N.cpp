@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               3002
+#define        N                               1000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,38 +46,31 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> v[N][N];
-vector<int> adj[N];
-int level[N][N];
-int n;
-pii par[N][N];
-int bfs(pii &last) {
-    queue<pii> q;
-    q.push(make_pair(0,3001));
-    level[0][3001]=0;
-    while(!q.empty()) {
-
-        pii u= q.front();
-        if(u.ff==n-1) {
-            last = u;
-            return level[u.ff][u.ss];
-        }
-        q.pop();
-        for(auto it : adj[u.ff]) {
-            if(binary_search(ALL(v[u.ss][u.ff]),it)) continue;
-            if(level[it][u.ff]==-1) {
-                level[it][u.ff]=level[u.ff][u.ss]+1;
-                par[it][u.ff]= u;
-                q.push(make_pair(it,u.ff));
-            }
-        }
-    }
-    return -1;
+vector<int>primes;
+bool mark[N];
+void sieve(int n) {
+    primes.push_back(2);
+    for(int i=3; i*i<=n; i+=2)
+        if(mark[i]==0)
+            for(int j = i*i; j <= n; j += i * 2)
+                mark[j] = 1;
+    for (int i = 3; i <= n; i += 2)
+        if (!mark[i]) primes.push_back(i);
 }
-void dfs(pii last) {
-    if(last.ss!=3001)
-        dfs(par[last.ff][last.ss]);
-    printf("%d ",1+last.ff);
+vector<int> v[N];
+int p[N];
+double dp[N];
+double go(int n) {
+    if(n<=2) return n-1;
+    if(dp[n]!=-1) return dp[n];
+    double res = 0;
+    double totPrime = p[n];
+    double notDivisible= totPrime-v[n].size();
+    for(auto it : v[n]) {
+        res+=(go(n/it)+1)/totPrime;
+    }
+    res+=notDivisible/totPrime;
+    return dp[n]=(res*totPrime)/(double)(v[n].size());
 }
 int main(){
     #ifdef sayed
@@ -86,31 +79,24 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n = nxt();
-    int m = nxt();
-    int q=nxt();
-    for(int i = 0;i<m;i++){
-        int a= nxt()-1;
-        int b=nxt()-1;
-        adj[a].pb(b);
-        adj[b].pb(a);
+    sieve(N-1);
+    for(int i = 0;i<primes.size();i++) {
+        for(int j = primes[i];j<N;j+=primes[i]) {
+            v[j].pb(primes[i]);
+        }
     }
-    for(int i =0;i<q;i++) {
-        int a = nxt()-1;
-        int b= nxt()-1;
-        int c= nxt()-1;
-        v[a][b].pb(c);
+    for(int i =0;i<primes.size()-1;i++) {
+        for(int j = primes[i];j<primes[i+1];j++) {
+            p[j]+=(i+1);
+        }
     }
-    for(int i = 0;i<n;i++){
-        for(int j = 0;j<n;j++) sort(ALL(v[i][j]));
+    FOR(i,0,N) dp[i] = -1;
+    int test = nxt();
+    int cs = 1;
+    while(test--) {
+        int n = nxt();
+        printf("Case %d: %0.10f\n",cs++,go(n));
     }
-    SET(level);
-    pii last;
-    int res = bfs(last);
-    if(res!=-1) {
-        cout<<res<<endl;
-        dfs(last);
-    } else cout<<-1<<endl;
     return 0;
 }
 

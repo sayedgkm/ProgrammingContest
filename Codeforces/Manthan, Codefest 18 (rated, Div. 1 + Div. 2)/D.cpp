@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               3002
+#define        N                               1000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,39 +46,9 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> v[N][N];
-vector<int> adj[N];
-int level[N][N];
-int n;
-pii par[N][N];
-int bfs(pii &last) {
-    queue<pii> q;
-    q.push(make_pair(0,3001));
-    level[0][3001]=0;
-    while(!q.empty()) {
-
-        pii u= q.front();
-        if(u.ff==n-1) {
-            last = u;
-            return level[u.ff][u.ss];
-        }
-        q.pop();
-        for(auto it : adj[u.ff]) {
-            if(binary_search(ALL(v[u.ss][u.ff]),it)) continue;
-            if(level[it][u.ff]==-1) {
-                level[it][u.ff]=level[u.ff][u.ss]+1;
-                par[it][u.ff]= u;
-                q.push(make_pair(it,u.ff));
-            }
-        }
-    }
-    return -1;
-}
-void dfs(pii last) {
-    if(last.ss!=3001)
-        dfs(par[last.ff][last.ss]);
-    printf("%d ",1+last.ff);
-}
+int ar[N];
+set<int> adj[N];
+queue<int> q;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -86,31 +56,45 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n = nxt();
-    int m = nxt();
-    int q=nxt();
-    for(int i = 0;i<m;i++){
-        int a= nxt()-1;
-        int b=nxt()-1;
-        adj[a].pb(b);
-        adj[b].pb(a);
+
+    int n =nxt();
+    for(int i = 0;i<n-1;i++) {
+        int a= nxt();
+        int b= nxt();
+        adj[a].insert(b);
+        adj[b].insert(a);
     }
-    for(int i =0;i<q;i++) {
-        int a = nxt()-1;
-        int b= nxt()-1;
-        int c= nxt()-1;
-        v[a][b].pb(c);
+    for(int i = 0;i<n;i++) ar[i]=nxt();
+    if(ar[0]!=1) {
+        cout<<"No"<<endl;
+        return 0;
     }
-    for(int i = 0;i<n;i++){
-        for(int j = 0;j<n;j++) sort(ALL(v[i][j]));
+    if(n==1) {
+        cout<<"Yes"<<endl;
+        return 0;
     }
-    SET(level);
-    pii last;
-    int res = bfs(last);
-    if(res!=-1) {
-        cout<<res<<endl;
-        dfs(last);
-    } else cout<<-1<<endl;
+    q.push(1);
+    int i = 1;
+    while(!q.empty()) {
+        int top = q.front();
+        q.pop();
+        while(adj[top].size()) {
+            int val = ar[i++];
+            if(adj[top].find(val)!=adj[top].end()) {
+                q.push(val);
+                adj[top].erase(adj[top].find(val));
+                adj[val].erase(adj[val].find(top));
+                if(i>=n) {
+                    cout<<"Yes"<<endl;
+                    return 0;
+                }
+            } else {
+                cout<<"No"<<endl;
+                return 0;
+            }
+        }
+    }
+    assert(0);
     return 0;
 }
 

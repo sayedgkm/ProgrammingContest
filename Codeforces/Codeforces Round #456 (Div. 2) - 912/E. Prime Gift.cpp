@@ -47,6 +47,28 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+vector<ll> v[2];
+map<ll,int> mp;
+vector<int> prime;
+void dfs(int pos,ll tmp,int f) {
+    if(pos>=prime.size())  {
+        v[f].pb(tmp);
+        return;
+    }
+    dfs(pos+1,tmp,f);
+    if(prime[pos]<=((ll)1e18+1000)/tmp) dfs(pos,tmp*prime[pos],f);
+}
+ll go(ll prod) {
+    ll sum = 0;
+    for(int i = 0;i<v[0].size();i++) {
+        ll need = prod/v[0][i];
+        int l = upper_bound(ALL(v[1]),need)-v[1].begin();
+        l--;
+        sum+=(l+1);
+    }
+    return sum;
+
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -55,6 +77,33 @@ int main(){
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
 
+    int n = nxt();
+    for(int i = 0;i<n;i++) {
+        ar[i] = nxt();
+    }
+    sort(ar,ar+n);
+    for(int i =0;i<min(3,n);i++) {
+        prime.pb(ar[i]);
+    }
+    dfs(0,1LL,0);
+    prime.clear();
+    for(int i = min(3,n);i<n;i++) {
+        prime.pb(ar[i]);
+    }
+    dfs(0,1LL,1);
+    sort(ALL(v[0]));
+    sort(ALL(v[1]));
+    v[0].erase(unique(ALL(v[0])),v[0].end());
+    v[1].erase(unique(ALL(v[1])),v[1].end());
+    ll k = lxt();
+    ll lo = 1;
+    ll hi =(ll)1e18+100;
+    while(lo<=hi) {
+        ll mid= (lo+hi)/2;
+        if(go(mid)>=k) hi = mid-1;
+        else lo = mid+1;
+    }
+    cout<<lo<<endl;
 
     return 0;
 }

@@ -1,4 +1,4 @@
- /// Bismillahir-Rahmanir-Rahim
+///Bismillahir-Rahmanir-Rahim
 #include <bits/stdc++.h>
 #define        ll                              long long int
 #define        FOR(x,y,z)                      for(int x=y;x<z;x++)
@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               3002
+#define        N                               1000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,38 +46,19 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> v[N][N];
-vector<int> adj[N];
-int level[N][N];
-int n;
-pii par[N][N];
-int bfs(pii &last) {
-    queue<pii> q;
-    q.push(make_pair(0,3001));
-    level[0][3001]=0;
-    while(!q.empty()) {
-
-        pii u= q.front();
-        if(u.ff==n-1) {
-            last = u;
-            return level[u.ff][u.ss];
-        }
-        q.pop();
-        for(auto it : adj[u.ff]) {
-            if(binary_search(ALL(v[u.ss][u.ff]),it)) continue;
-            if(level[it][u.ff]==-1) {
-                level[it][u.ff]=level[u.ff][u.ss]+1;
-                par[it][u.ff]= u;
-                q.push(make_pair(it,u.ff));
-            }
-        }
-    }
-    return -1;
+int ar[N];
+ll getRandom(ll l,ll r) {
+    ll tmp = r-l+1;
+    int x = rand()%tmp;
+    return l+x;
 }
-void dfs(pii last) {
-    if(last.ss!=3001)
-        dfs(par[last.ff][last.ss]);
-    printf("%d ",1+last.ff);
+bool isContain(ll l,ll r) {
+    cout<<l<<" "<<r<<endl;
+    string s;
+    cin>>s;
+    if(s=="Yes") return 1;
+    if(s=="No") return 0;
+    assert(0);
 }
 int main(){
     #ifdef sayed
@@ -86,31 +67,34 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n = nxt();
-    int m = nxt();
-    int q=nxt();
-    for(int i = 0;i<m;i++){
-        int a= nxt()-1;
-        int b=nxt()-1;
-        adj[a].pb(b);
-        adj[b].pb(a);
+    srand(time(0));
+    ll n;
+    int k;
+    cin>>n>>k;
+    ll l = 1;
+    ll r = n;
+    while(1) {
+
+        while(r-l-1>4*k) {
+            ll mid = (l+r)/2;
+            if(isContain(l,mid)) {
+                l = max(1LL,l-k);
+                r = min(n,mid+k);
+            }  else {
+                l = max(1LL,mid-k);
+                r  = min(n,r+k);
+            }
+        }
+
+        ll tmp = getRandom(l,r);
+        if(isContain(tmp,tmp)) {
+            break;
+        } else {
+            l-=k;
+            l= max(l,1LL);
+            r+=k;
+            r = min(r,n);
+        }
     }
-    for(int i =0;i<q;i++) {
-        int a = nxt()-1;
-        int b= nxt()-1;
-        int c= nxt()-1;
-        v[a][b].pb(c);
-    }
-    for(int i = 0;i<n;i++){
-        for(int j = 0;j<n;j++) sort(ALL(v[i][j]));
-    }
-    SET(level);
-    pii last;
-    int res = bfs(last);
-    if(res!=-1) {
-        cout<<res<<endl;
-        dfs(last);
-    } else cout<<-1<<endl;
     return 0;
 }
-

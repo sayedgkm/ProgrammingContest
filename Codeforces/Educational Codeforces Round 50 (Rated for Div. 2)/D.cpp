@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               3002
+#define        N                               1000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,39 +46,9 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-vector<int> v[N][N];
-vector<int> adj[N];
-int level[N][N];
-int n;
-pii par[N][N];
-int bfs(pii &last) {
-    queue<pii> q;
-    q.push(make_pair(0,3001));
-    level[0][3001]=0;
-    while(!q.empty()) {
-
-        pii u= q.front();
-        if(u.ff==n-1) {
-            last = u;
-            return level[u.ff][u.ss];
-        }
-        q.pop();
-        for(auto it : adj[u.ff]) {
-            if(binary_search(ALL(v[u.ss][u.ff]),it)) continue;
-            if(level[it][u.ff]==-1) {
-                level[it][u.ff]=level[u.ff][u.ss]+1;
-                par[it][u.ff]= u;
-                q.push(make_pair(it,u.ff));
-            }
-        }
-    }
-    return -1;
-}
-void dfs(pii last) {
-    if(last.ss!=3001)
-        dfs(par[last.ff][last.ss]);
-    printf("%d ",1+last.ff);
-}
+ll ar[N];
+ll br[N];
+ll tmp[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -86,31 +56,55 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n = nxt();
+
+    int n= nxt();
+    ll sum1 = 0;
+    ll sum2 = 0;
+    for(int i = 0;i<n;i++) {
+        ar[i] = lxt();
+        sum1+=ar[i];
+    }
     int m = nxt();
-    int q=nxt();
-    for(int i = 0;i<m;i++){
-        int a= nxt()-1;
-        int b=nxt()-1;
-        adj[a].pb(b);
-        adj[b].pb(a);
+    for(int i = 0;i<m;i++) br[i] = lxt(),sum2+=br[i];
+    if(sum1!=sum2) {
+        cout<<-1<<endl;
+        return 0;
     }
-    for(int i =0;i<q;i++) {
-        int a = nxt()-1;
-        int b= nxt()-1;
-        int c= nxt()-1;
-        v[a][b].pb(c);
+    int i = 0;
+    int j =0;
+    int cnt  = 0;
+    sum1=sum2 = 0;
+
+    while(i<=n||j<=m) {
+        if(sum1==0&&sum2==0) {
+            if(i<=n){
+                sum1+=ar[i];
+                i++;
+            }
+            if(j<=m) {
+                sum2+=br[j];
+                j++;
+            }
+
+        } else {
+            if(sum1==sum2) {
+                cnt++;
+                sum1=sum2=0;
+
+            } else {
+                if(sum1<sum2) {
+                    sum1+=ar[i];
+                    i++;
+                } else {
+                    sum2+=br[j];
+                    j++;
+                }
+            }
+        }
+        debug(sum1,sum2);
     }
-    for(int i = 0;i<n;i++){
-        for(int j = 0;j<n;j++) sort(ALL(v[i][j]));
-    }
-    SET(level);
-    pii last;
-    int res = bfs(last);
-    if(res!=-1) {
-        cout<<res<<endl;
-        dfs(last);
-    } else cout<<-1<<endl;
+    if(sum1==sum2&&sum1!=0) cnt++;
+    cout<<cnt<<endl;
     return 0;
 }
 
