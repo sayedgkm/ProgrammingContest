@@ -46,31 +46,10 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-ll ar[22][22];
-map<ll, ll > mp[22][22];
-int n,m;
-void backTrack(int i,int j,int k,ll val) {
-    if(k==0) {
-       // debug(val^ar[i][j]);
-        mp[i][j][val^ar[i][j]]++;
-        return;
-    }
-    if(i+1<n) backTrack(i+1,j,k-1,val^ar[i][j]);
-    if(j+1<m)backTrack(i,j+1,k-1,val^ar[i][j]);
-}
-ll need;
-ll reverseBacktrack(int i,int j,int k,ll val) {
-
-    if(k==0) {
-        if(mp[i][j].count(need^val))
-            return mp[i][j][need^val];
-        return 0;
-    }
-    ll res = 0;
-    if(i-1>=0) res+=reverseBacktrack(i-1,j,k-1,val^ar[i][j]);
-    if(j-1>=0) res+=reverseBacktrack(i,j-1,k-1,val^ar[i][j]);
-    return res;
-}
+int ar[N];
+vector<int> v[105];
+int ans[N];
+vector<int> cnt[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,18 +57,70 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n =nxt();
-    m= nxt();
-    need = lxt();
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<m;j++) {
-            ar[i][j]= lxt();
+
+    int n =nxt();
+    for(int i = 0;i<n;i++) {
+        int a= nxt();
+        v[a].pb(i);
+
+    }
+    for(int i = 1;i<=100;i++) {
+        if((int)v[i].size()) {
+            int sz = (int)v[i].size();
+            ar[sz]++;
         }
     }
-    int len = n+m;
-    len-=2;
-    backTrack(0,0,len/2,0);
-    cout<<reverseBacktrack(n-1,m-1,len-len/2,0)<<endl;
+    if(ar[1]%2==0) {
+        printf("YES\n");
+        vector<int> res;
+        for(int i = 1;i<=100;i++) {
+            if(v[i].size()==1) {
+               res.pb(v[i][0]);
+               v[i].pop_back();
+            }
+        }
+        for(int i = 0;i<(int)(res.size()/2);i++) {
+            ans[res[i]]=1;
+            //debug(res[i]);
+        }
+        for(int i = 0;i<n;i++) {
+            if(ans[i]) printf("A");
+            else printf("B");
+        }
+        printf("\n");
 
+    } else{
+        bool f = 0;
+        for(int i = 3;i<=100;i++) {
+            if(ar[i]) f = 1;
+        }
+        if(f==0) {
+            printf("NO\n");
+        } else {
+            printf("YES\n");
+
+            vector<int> res;
+            for(int i = 1;i<=100;i++) {
+                if(v[i].size()==1) {
+                   res.pb(v[i][0]);
+                   v[i].pop_back();
+                }
+            }
+            for(int i = 1;i<=100;i++) {
+                if(v[i].size()>2) {
+                    ans[v[i][0]]=1;
+                    break;
+                }
+            }
+            for(int i = 0;i<(int)(res.size()/2);i++) {
+                ans[res[i]]=1;
+            }
+            for(int i = 0;i<n;i++) {
+                if(ans[i]) printf("A");
+                else printf("B");
+            }
+            printf("\n");
+        }
+    }
     return 0;
 }

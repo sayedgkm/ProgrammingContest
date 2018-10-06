@@ -69,7 +69,7 @@ int main(){
            if(a[i]==a[n-i-1]) continue;
            ans++;
         } else {
-             if(a[i]==b[i]&&b[n-i-1]==b[n-i-1]) continue;
+             if(a[i]==b[i]&&a[n-i-1]==b[n-i-1]) continue;
              else if(a[i]==b[n-i-1]&&a[n-i-1]==b[i]) continue;
              else if(a[i]==b[i]||a[i]==b[n-i-1]||a[n-i-1]==b[i]||a[n-i-1]==b[n-i-1]) ans++;
              else ans+=2;

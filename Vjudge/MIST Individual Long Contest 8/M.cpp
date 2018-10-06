@@ -46,30 +46,37 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-ll ar[22][22];
-map<ll, ll > mp[22][22];
-int n,m;
-void backTrack(int i,int j,int k,ll val) {
-    if(k==0) {
-       // debug(val^ar[i][j]);
-        mp[i][j][val^ar[i][j]]++;
-        return;
-    }
-    if(i+1<n) backTrack(i+1,j,k-1,val^ar[i][j]);
-    if(j+1<m)backTrack(i,j+1,k-1,val^ar[i][j]);
+/*
+Shanks baby step giant step - discrete logarithm algorithm
+for the equation: b = a^x % p where a, b, p known, finds x
+works only when p is an odd prime
+*/
+ll modInv(ll a,ll p) {
+    return bigmod(a,p-2,p);
 }
-ll need;
-ll reverseBacktrack(int i,int j,int k,ll val) {
-
-    if(k==0) {
-        if(mp[i][j].count(need^val))
-            return mp[i][j][need^val];
-        return 0;
+ll shank(ll a, ll b, ll p) {
+    ll  i, j, sq;
+    long long c, aj, ami;
+    map< long long, int > m;
+    map< long long, int > :: iterator it;
+    sq = (int)ceil(sqrt((double)(p)));
+    m.insert(make_pair(1, 0));
+    for(j = 1, aj = 1; j < sq; j++) {
+        aj = (aj * a) % p;
+        m.insert(make_pair(aj, j));
     }
-    ll res = 0;
-    if(i-1>=0) res+=reverseBacktrack(i-1,j,k-1,val^ar[i][j]);
-    if(j-1>=0) res+=reverseBacktrack(i,j-1,k-1,val^ar[i][j]);
-    return res;
+    ami = bigmod(modInv(a, p), sq, p);
+    for(c = b, i = 0; i < sq; i++) {
+        it = m.find(c);
+        if(it != m.end()) return i * sq + it->second;
+        c = (c * ami) % p;
+    }
+    return 0;
+}
+vector<pii> v;
+int solve(ll col,ll k,ll res) {
+
+
 }
 int main(){
     #ifdef sayed
@@ -78,18 +85,18 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n =nxt();
-    m= nxt();
-    need = lxt();
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<m;j++) {
-            ar[i][j]= lxt();
+    int test = nxt();
+    while(test--) {
+        int c= nxt();
+        int k = nxt();
+        int b = nxt();
+        int res = nxt();
+        for(int i =0;i<b;i++) {
+            int a= nxt();
+            int b= nxt();
+            v.pb(make_pair(a,b));
         }
     }
-    int len = n+m;
-    len-=2;
-    backTrack(0,0,len/2,0);
-    cout<<reverseBacktrack(n-1,m-1,len-len/2,0)<<endl;
 
     return 0;
 }

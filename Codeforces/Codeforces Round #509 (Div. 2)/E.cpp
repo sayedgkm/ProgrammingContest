@@ -46,30 +46,20 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-ll ar[22][22];
-map<ll, ll > mp[22][22];
-int n,m;
-void backTrack(int i,int j,int k,ll val) {
-    if(k==0) {
-       // debug(val^ar[i][j]);
-        mp[i][j][val^ar[i][j]]++;
-        return;
+int ar[N];
+vector<int> v;
+vector<pii> edge;
+int cnt[N];
+int mark[N];
+set<int> st;
+int get(int x) {
+    for(int i = x-1;i>=1;i--) {
+        if(st.find(i)==st.end()&&!mark[i]) {
+            mark[i] = 1;
+            return i;
+        }
     }
-    if(i+1<n) backTrack(i+1,j,k-1,val^ar[i][j]);
-    if(j+1<m)backTrack(i,j+1,k-1,val^ar[i][j]);
-}
-ll need;
-ll reverseBacktrack(int i,int j,int k,ll val) {
-
-    if(k==0) {
-        if(mp[i][j].count(need^val))
-            return mp[i][j][need^val];
-        return 0;
-    }
-    ll res = 0;
-    if(i-1>=0) res+=reverseBacktrack(i-1,j,k-1,val^ar[i][j]);
-    if(j-1>=0) res+=reverseBacktrack(i,j-1,k-1,val^ar[i][j]);
-    return res;
+    return -1;
 }
 int main(){
     #ifdef sayed
@@ -78,18 +68,53 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n =nxt();
-    m= nxt();
-    need = lxt();
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<m;j++) {
-            ar[i][j]= lxt();
+    int n = nxt();
+    for(int i = 1;i<n;i++) {
+        int a= nxt();
+        int b= nxt();
+        if(a>b) swap(a,b);
+        if(b!=n) {
+            cout<<"NO"<<endl;
+            return 0;
         }
+        if(a==b&&b==n){
+            cout<<"NO"<<endl;
+            return 0;
+        }
+        st.insert(a);
+        cnt[a]++;
+        if(cnt[a]==0)
+            v.pb(a);
     }
-    int len = n+m;
-    len-=2;
-    backTrack(0,0,len/2,0);
-    cout<<reverseBacktrack(n-1,m-1,len-len/2,0)<<endl;
+    for(int i = n-1;i>=1;i--) {
+        vector<int> ok;
+        if(cnt[i]) {
+            ok.pb(i);
+            cnt[i]--;
+            while(cnt[i]--) {
+                int val = get(i);
+                if(val==-1) {
+                    printf("NO\n");
+                    return 0;
+                }
+                ok.pb(val);
+            }
+            sort(ALL(ok));
+            for(int i = 1;i<ok.size();i++) {
+                edge.pb(make_pair(ok[i],ok[i-1]));
+            }
+            edge.pb(make_pair(n,ok[0]));
+        }
+
+    }
+    if(edge.size()!=n-1){
+        printf("NO\n");
+            return 0;
+    }
+    printf("YES\n");
+    for(auto it : edge) {
+        printf("%d %d\n",it.ff,it.ss);
+    }
 
     return 0;
 }

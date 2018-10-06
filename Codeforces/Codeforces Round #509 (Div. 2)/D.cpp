@@ -46,31 +46,12 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-ll ar[22][22];
-map<ll, ll > mp[22][22];
-int n,m;
-void backTrack(int i,int j,int k,ll val) {
-    if(k==0) {
-       // debug(val^ar[i][j]);
-        mp[i][j][val^ar[i][j]]++;
-        return;
-    }
-    if(i+1<n) backTrack(i+1,j,k-1,val^ar[i][j]);
-    if(j+1<m)backTrack(i,j+1,k-1,val^ar[i][j]);
-}
-ll need;
-ll reverseBacktrack(int i,int j,int k,ll val) {
-
-    if(k==0) {
-        if(mp[i][j].count(need^val))
-            return mp[i][j][need^val];
-        return 0;
-    }
-    ll res = 0;
-    if(i-1>=0) res+=reverseBacktrack(i-1,j,k-1,val^ar[i][j]);
-    if(j-1>=0) res+=reverseBacktrack(i,j-1,k-1,val^ar[i][j]);
-    return res;
-}
+int ar[N];
+struct info{
+    ll x,y;
+    ll sum;
+};
+vector<info> v;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,18 +59,42 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n =nxt();
-    m= nxt();
-    need = lxt();
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<m;j++) {
-            ar[i][j]= lxt();
-        }
+    int n = nxt();
+    ll h = lxt();
+    for(int i = 0;i<n;i++) {
+        info tmp ;
+        tmp.x = lxt();
+        tmp.y  = lxt();
+        if(v.size()==0) tmp.sum =0;
+        else tmp.sum = tmp.x-v.back().y;
+        v.pb(tmp);
     }
-    int len = n+m;
-    len-=2;
-    backTrack(0,0,len/2,0);
-    cout<<reverseBacktrack(n-1,m-1,len-len/2,0)<<endl;
+    info tmp ;
+    tmp.x = (ll)3e12;
+    tmp.y = (ll)3e12;
+    tmp.sum =(ll)3e12;
+    v.pb(tmp);
 
+    for(int i = 1;i<(int)v.size();i++) v[i].sum+=v[i-1].sum;
+    ll res =0;
+    for(int i =0;i<(int)v.size()-1;i++) {
+
+        int lo = i;
+        int hi = (int)v.size()-1;
+
+        while(lo<=hi) {
+            int mid = (lo+hi)/2;
+            if(v[mid].sum-v[i].sum>=h) hi = mid-1;
+            else lo = mid+1;
+        }
+        ll tot = v[lo-1].sum-v[i].sum;
+        tot = h-tot;
+        assert(tot>=0);
+        ll ans = (v[lo-1].y+tot)-v[i].x;
+        //debug(ans);
+        res = max(res,ans);
+    }
+
+    cout<<res<<endl;
     return 0;
 }

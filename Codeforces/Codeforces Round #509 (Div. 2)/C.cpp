@@ -46,31 +46,26 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-ll ar[22][22];
-map<ll, ll > mp[22][22];
-int n,m;
-void backTrack(int i,int j,int k,ll val) {
-    if(k==0) {
-       // debug(val^ar[i][j]);
-        mp[i][j][val^ar[i][j]]++;
-        return;
+pii ar[N];
+int n,m,d;
+vector<pii> v[N];
+bool go(int mid) {
+    for(int i = 0;i<=n;i++) v[i].clear();
+    int x = 1;
+    for(int i = 0;i<n;i++) {
+        if(v[x].size()==0) {
+            v[x].pb(ar[i]);
+            x++;
+        } else {
+            if(ar[i].ff-v[x].back().ff<=d) return false;
+            v[x].pb(ar[i]);
+            x++;
+        }
+        if(x>mid) x = 1;
     }
-    if(i+1<n) backTrack(i+1,j,k-1,val^ar[i][j]);
-    if(j+1<m)backTrack(i,j+1,k-1,val^ar[i][j]);
+    return true;
 }
-ll need;
-ll reverseBacktrack(int i,int j,int k,ll val) {
-
-    if(k==0) {
-        if(mp[i][j].count(need^val))
-            return mp[i][j][need^val];
-        return 0;
-    }
-    ll res = 0;
-    if(i-1>=0) res+=reverseBacktrack(i-1,j,k-1,val^ar[i][j]);
-    if(j-1>=0) res+=reverseBacktrack(i,j-1,k-1,val^ar[i][j]);
-    return res;
-}
+int ans[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -78,18 +73,29 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n =nxt();
-    m= nxt();
-    need = lxt();
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<m;j++) {
-            ar[i][j]= lxt();
+    n = nxt();
+    m =nxt();
+    d =nxt();
+    for(int i = 0;i<n;i++) ar[i].ff = nxt(),ar[i].ss=i;
+    sort(ar,ar+n);
+   // debug(go(3));
+    int lo = 1;
+    int hi = n;
+    while(lo<=hi) {
+        int mid = (lo+hi)/2;
+        if(go(mid)) hi =  mid-1;
+        else lo = mid+1;
+    }
+    go(lo);
+    for(int i = 1;i<=lo;i++) {
+        for(auto it : v[i]) {
+            ans[it.ss]=i;
         }
     }
-    int len = n+m;
-    len-=2;
-    backTrack(0,0,len/2,0);
-    cout<<reverseBacktrack(n-1,m-1,len-len/2,0)<<endl;
+    printf("%d\n",lo);
+    for(int i = 0;i<n;i++) printf("%d ",ans[i]);
+    printf("\n");
+
 
     return 0;
 }

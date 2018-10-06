@@ -46,30 +46,19 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-ll ar[22][22];
-map<ll, ll > mp[22][22];
-int n,m;
-void backTrack(int i,int j,int k,ll val) {
-    if(k==0) {
-       // debug(val^ar[i][j]);
-        mp[i][j][val^ar[i][j]]++;
-        return;
-    }
-    if(i+1<n) backTrack(i+1,j,k-1,val^ar[i][j]);
-    if(j+1<m)backTrack(i,j+1,k-1,val^ar[i][j]);
-}
-ll need;
-ll reverseBacktrack(int i,int j,int k,ll val) {
+int ar[N];
+vector<int> adj[N];
+vector<pii> ans;
+void dfs(int st,int f,int p=-1) {
 
-    if(k==0) {
-        if(mp[i][j].count(need^val))
-            return mp[i][j][need^val];
-        return 0;
+    for(int i =0;i<adj[st].size();i++) {
+        int v = adj[st][i];
+        if(v==p) continue;
+        if(f==0) {
+            ans.pb(make_pair(v,st));
+        } else ans.pb(make_pair(st,v));
+        dfs(v,f^1,st);
     }
-    ll res = 0;
-    if(i-1>=0) res+=reverseBacktrack(i-1,j,k-1,val^ar[i][j]);
-    if(j-1>=0) res+=reverseBacktrack(i,j-1,k-1,val^ar[i][j]);
-    return res;
 }
 int main(){
     #ifdef sayed
@@ -77,19 +66,36 @@ int main(){
     // freopen("in.txt","r",stdin);
     #endif
     //ios_base::sync_with_stdio(false);
-    //cin.tie(0);
-    n =nxt();
-    m= nxt();
-    need = lxt();
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<m;j++) {
-            ar[i][j]= lxt();
+        //cin.tie(0);
+    int test=nxt();int cs = 1;
+    while(test--) {
+
+        int n = nxt();
+        for(int i = 0;i<n-1;i++) {
+            int a= nxt();
+            int b= nxt();
+            adj[a].pb(b);
+            adj[b].pb(a);
         }
+        int st=-1;
+        for(int i =1;i<=n;i++){
+            if(adj[i].size()==1) {
+                st = i;
+                break;
+            }
+        }
+        assert(st!=-1);
+        dfs(st,0);
+        printf("Case %d:\n",cs++);
+        assert(ans.size()==n-1);
+        for(int i =0;i<ans.size();i++) {
+            printf("%d %d\n",ans[i].ff,ans[i].ss);
+        }
+        for(int i =0;i<N;i++) adj[i].clear();
+        ans.clear();
+
     }
-    int len = n+m;
-    len-=2;
-    backTrack(0,0,len/2,0);
-    cout<<reverseBacktrack(n-1,m-1,len-len/2,0)<<endl;
 
     return 0;
 }
+

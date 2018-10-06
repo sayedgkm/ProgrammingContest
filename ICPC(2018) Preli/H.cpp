@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               1000010
+#define        N                               6000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -46,29 +46,30 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-ll ar[22][22];
-map<ll, ll > mp[22][22];
-int n,m;
-void backTrack(int i,int j,int k,ll val) {
-    if(k==0) {
-       // debug(val^ar[i][j]);
-        mp[i][j][val^ar[i][j]]++;
-        return;
+char ar[N];
+long long dp[N][5];
+int vis[N][5];
+int len;
+int cs=1;
+ll go(int pos,int last) {
+    if(pos>=len) {
+        return 1LL;
     }
-    if(i+1<n) backTrack(i+1,j,k-1,val^ar[i][j]);
-    if(j+1<m)backTrack(i,j+1,k-1,val^ar[i][j]);
-}
-ll need;
-ll reverseBacktrack(int i,int j,int k,ll val) {
-
-    if(k==0) {
-        if(mp[i][j].count(need^val))
-            return mp[i][j][need^val];
-        return 0;
+    ll &res =dp[pos][last];
+    if(vis[pos][last]==cs) return res;
+    vis[pos][last] = cs;
+    res = 0;
+    if(ar[pos]=='R'&&last!=0) res+=go(pos+1,0);
+    if(ar[pos]=='G'&&last!=1) res+=go(pos+1,1);
+    if(ar[pos]=='B'&&last!=2) res+=go(pos+1,2);
+    res%=M;
+    if(ar[pos]=='W') {
+        for(int i =0;i<=2;i++) {
+            if(i==last) continue;
+            res+=go(pos+1,i);
+            res%=M;
+        }
     }
-    ll res = 0;
-    if(i-1>=0) res+=reverseBacktrack(i-1,j,k-1,val^ar[i][j]);
-    if(j-1>=0) res+=reverseBacktrack(i,j-1,k-1,val^ar[i][j]);
     return res;
 }
 int main(){
@@ -78,18 +79,12 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n =nxt();
-    m= nxt();
-    need = lxt();
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<m;j++) {
-            ar[i][j]= lxt();
-        }
+    int test =nxt();
+    while(test--) {
+        scanf("%s",ar);
+        len=strlen(ar);
+        printf("Case %d: %lld\n",cs++,go(0,3));
     }
-    int len = n+m;
-    len-=2;
-    backTrack(0,0,len/2,0);
-    cout<<reverseBacktrack(n-1,m-1,len-len/2,0)<<endl;
 
     return 0;
 }

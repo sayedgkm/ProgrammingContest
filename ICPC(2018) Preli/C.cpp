@@ -46,50 +46,37 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-ll ar[22][22];
-map<ll, ll > mp[22][22];
-int n,m;
-void backTrack(int i,int j,int k,ll val) {
-    if(k==0) {
-       // debug(val^ar[i][j]);
-        mp[i][j][val^ar[i][j]]++;
-        return;
+ll go(ll n) {
+    if(n==0) return 0;
+   ll sq = sqrt(n);
+   sq = max(1LL,sq-2);
+   while(sq*sq<=n) sq++;
+   sq--;
+   ll res = sq;
+    ll lo = 0;
+    ll hi = sq;
+    while(lo<=hi) {
+        ll mid =(lo+hi)/2;
+        if(mid*mid*2LL<=n) lo = mid+1;
+        else hi = mid-1;
     }
-    if(i+1<n) backTrack(i+1,j,k-1,val^ar[i][j]);
-    if(j+1<m)backTrack(i,j+1,k-1,val^ar[i][j]);
-}
-ll need;
-ll reverseBacktrack(int i,int j,int k,ll val) {
+   return res+lo-1;
 
-    if(k==0) {
-        if(mp[i][j].count(need^val))
-            return mp[i][j][need^val];
-        return 0;
-    }
-    ll res = 0;
-    if(i-1>=0) res+=reverseBacktrack(i-1,j,k-1,val^ar[i][j]);
-    if(j-1>=0) res+=reverseBacktrack(i,j-1,k-1,val^ar[i][j]);
-    return res;
 }
 int main(){
     #ifdef sayed
-    //freopen("out.txt","w",stdout);
+   // freopen("out1.txt","w",stdout);
     // freopen("in.txt","r",stdin);
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n =nxt();
-    m= nxt();
-    need = lxt();
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<m;j++) {
-            ar[i][j]= lxt();
-        }
-    }
-    int len = n+m;
-    len-=2;
-    backTrack(0,0,len/2,0);
-    cout<<reverseBacktrack(n-1,m-1,len-len/2,0)<<endl;
+    int test = nxt();
+    int cs = 1;
+    while(test--) {
 
+        ll a = lxt();
+        ll b= lxt();
+        printf("Case %d: %lld\n",cs++,go(b)-go(a-1));
+    }
     return 0;
 }

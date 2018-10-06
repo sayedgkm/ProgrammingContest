@@ -7,7 +7,7 @@
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
 #define        N                               1000010
-#define        M                               1000000007
+#define        M                               998244353
 #define        pi                              acos(-1.0)
 #define        ff                              first
 #define        ss                              second
@@ -46,29 +46,47 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-ll ar[22][22];
-map<ll, ll > mp[22][22];
-int n,m;
-void backTrack(int i,int j,int k,ll val) {
-    if(k==0) {
-       // debug(val^ar[i][j]);
-        mp[i][j][val^ar[i][j]]++;
-        return;
+int ar[N];
+int n;
+ll dp[1002][2002][2][2];
+ll go(int pos,int k,int f1,int f2) {
+    if(k<0) return 0;
+    if(pos==n) {
+        return k ==0;
     }
-    if(i+1<n) backTrack(i+1,j,k-1,val^ar[i][j]);
-    if(j+1<m)backTrack(i,j+1,k-1,val^ar[i][j]);
-}
-ll need;
-ll reverseBacktrack(int i,int j,int k,ll val) {
+    ll &res = dp[pos][k][f1][f2];
+    if(res!=-1) return res;
+    res = 0;
+    if(pos==0) {
+        res+=go(pos+1,k-1,0,0);
+        res+=go(pos+1,k-2,0,1);
+        res+=go(pos+1,k-2,1,0);
+        res+=go(pos+1,k-1,1,1);
+    } else {
+        if(f1==0&&f2==0) {
+            res+=go(pos+1,k,0,0);
+            res+=go(pos+1,k-1,1,1);
+            res+=go(pos+1,k-1,1,0);
+            res+=go(pos+1,k-1,0,1);
+        } else if(f1==1&&f2==1) {
+            res+=go(pos+1,k-1,0,0);
+            res+=go(pos+1,k,1,1);
+            res+=go(pos+1,k-1,1,0);
+            res+=go(pos+1,k-1,0,1);
+        } else if(f1==0&&f2==1) {
+            res+=go(pos+1,k,0,0);
+            res+=go(pos+1,k,1,1);
+            res+=go(pos+1,k-2,1,0);
+            res+=go(pos+1,k,0,1);
+        } else {
 
-    if(k==0) {
-        if(mp[i][j].count(need^val))
-            return mp[i][j][need^val];
-        return 0;
+            res+=go(pos+1,k,0,0);
+            res+=go(pos+1,k,1,1);
+            res+=go(pos+1,k,1,0);
+            res+=go(pos+1,k-2,0,1);
+        }
     }
-    ll res = 0;
-    if(i-1>=0) res+=reverseBacktrack(i-1,j,k-1,val^ar[i][j]);
-    if(j-1>=0) res+=reverseBacktrack(i,j-1,k-1,val^ar[i][j]);
+    res%=M;
     return res;
 }
 int main(){
@@ -78,18 +96,10 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    n =nxt();
-    m= nxt();
-    need = lxt();
-    for(int i =0;i<n;i++) {
-        for(int j = 0;j<m;j++) {
-            ar[i][j]= lxt();
-        }
-    }
-    int len = n+m;
-    len-=2;
-    backTrack(0,0,len/2,0);
-    cout<<reverseBacktrack(n-1,m-1,len-len/2,0)<<endl;
+    n = nxt();
+    int k = nxt();
+    SET(dp);
+    cout<<go(0,k,0,0)<<endl;
 
     return 0;
 }
