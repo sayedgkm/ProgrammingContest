@@ -46,7 +46,8 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-int ar[N];
+char t[N];
+vector<ll> v;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +55,68 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
-
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
+    int test = nxt();
+    while(test--) {
+        int n = nxt();
+        scanf("%s",t);
+        string s =t;
+        s = '?'+s;
+        v.clear();
+        v.resize(n+2);
+        ll need = 0;
+        int cur = 1;
+        int cnt= 0;
+        while(cur<=n) {
+            if(s[cur]=='#') {
+                cnt++;
+                cur++;
+                continue;
+            } else break;
         }
-        mp[Xor]++;
-    }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+        if(cnt==n) {
+            printf("0\n");
+            continue;
+        }
+        while(cur<=n) {
+            if(s[cur]=='.') cur++;
+            else break;
+        }
+        int nH= 0;
+        int nD = 0;
+        bool f =0;
+        for(int i = n;i>=cur;i--) {
+            if(s[i]=='.') nD++;
+            else nH++;
+            if(nH>nD) f = 1;
+        }
+        if(f) {
+            printf("-1\n");
+            continue;
+        }
 
+        for(int i = cur;i<=n;i++) {
+            if(s[i]=='#') {
+                need+=(ll)(i-cnt-1);
+                cnt++;
+                v[i] = 1;
+            }
+        }
+        for(int i = cur;i<=n;i++) {
+            if(v[i]>1) {
+                ll ex = v[i]-1;
+                need+=ex*2LL;
+                v[i+1]+=ex;
+                v[i]= 1;
+            }
+            if(v[i-1]>0) {
+                need+=v[i]*2LL;
+                v[i+1]+=v[i];
+                v[i]=0;
+            }
+        }
+        printf("%lld\n",need);
+
+    }
 
     return 0;
 }

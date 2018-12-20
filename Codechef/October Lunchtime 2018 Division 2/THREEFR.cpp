@@ -47,6 +47,13 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+bool go(int x,int y,int z) {
+    int A = 5;
+    int B = A+x;
+    int C = B+y;
+    if(C+z==A) return true;
+    return false;
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +61,24 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
+    int test = nxt();
+    while(test--) {
+        int x= nxt();
+        int y = nxt();
+        int z = nxt();
 
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+        bool f =0;
+        f|=go(x,y,z);
+        f|=go(-x,y,z);
+        f|=go(x,-y,z);
+        f|=go(x,y,-z);
+        f|=go(-x,y,-z);
+        f|=go(-x,-y,z);
+        f|=go(x,-y,-z);
+        f|=go(-x,-y,-z);
+        if(f) printf("yes\n");
+        else printf("no\n");
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
-
 
     return 0;
 }

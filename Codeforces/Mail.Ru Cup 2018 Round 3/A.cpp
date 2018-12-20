@@ -54,30 +54,26 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
+    int n = nxt();
+    for(int i =0;i<n;i++) {
 
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
+        int q = nxt();
+        set<int> st;
+        for(int i = 0;i<q;i++) {
+            int a= nxt();
+            st.insert(a);
         }
-        mp[Xor]++;
+        for(auto it: st)
+            ar[it]++;
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
-
+    vector<int> v;
+    for(int i = 1;i<=100;i++) {
+        if(ar[i]==n) v.pb(i);
+    }
+    for(int i =0;i<v.size();i++) {
+        printf("%d ",v[i]);
+    }
+    printf("\n");
 
     return 0;
 }

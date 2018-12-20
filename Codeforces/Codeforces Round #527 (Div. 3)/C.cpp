@@ -47,37 +47,61 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+vector<pair<string,int> > v[N];
+string ans[N];
+int n;
+bool getSoution(string pf,string sf) {
+
+    for(int i = 1;i<n;i++) {
+        pair<string,int>tmp=v[i][0];
+        pair<string,int>tmp1=v[i][1];
+        string s1 = tmp.ff;
+        string s2 = tmp1.ff;
+           // cout<<s1<<" "<<s2<<endl;
+        if(pf.substr(0,s1.size())==s1&&sf.substr( (int) (sf.size()-s2.size()) )==s2) {
+            ans[tmp.ss] = "P";
+            ans[tmp1.ss] = "S";
+        } else if(pf.substr(0,s2.size())==s2&&sf.substr(sf.size()-s1.size())==s1){
+            ans[tmp.ss] = "S";
+            ans[tmp1.ss] = "P";
+        } else return false;
+
+
+    }
+    return true;
+
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
     // freopen("in.txt","r",stdin);
     #endif
-    //ios_base::sync_with_stdio(false);
-    //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
-
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin>>n;
+    string s;
+    if(n==2) {
+        cin>>s>>s;
+        cout<<"PS"<<endl;
+        return 0;
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+    string pf,sf;
+    for(int i = 0;i<2*n-2;i++) {
+        string s;
+        cin>>s;
+        int len = s.size();
+        v[len].pb(make_pair(s,i));
+        if(s.size()==n-1) {
+            if(pf.size()==0) pf = s;
+            else sf = s;
+        }
+    }
+    if(!getSoution(pf,sf)) {
+        swap(pf,sf);
+        getSoution(pf,sf);
+    }
 
-
+    for(int i = 0;i<n*2-2;i++) cout<<ans[i];
+    cout<<endl;
     return 0;
 }

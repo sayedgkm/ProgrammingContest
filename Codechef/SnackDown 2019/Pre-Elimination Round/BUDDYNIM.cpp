@@ -54,30 +54,44 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
+    int test = nxt();
+    while(test--) {
 
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
+        int n = nxt();
+        int m = nxt();
+        long long sum1 = 0;
+        bool f=0;
+        vector<ll> v;
+        for(int i =0;i<n;i++){
+            long long  a= lxt();
+            if(a==0) continue;
+            sum1+=a;
+            v.pb(a);
         }
-        mp[Xor]++;
-    }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+        long long  sum2 = 0;
+        int f1 = 0;
+        vector<ll> v1;
+        for(int j = 0;j<m;j++) {
+            ll a = lxt();
+            if(a==0) continue;
+            v1.pb(a);
+            sum2+=a;
+        }
+        sort(ALL(v));
+        sort(ALL(v1));
+        if(v.size()!=v1.size()){
+//            if(sum1==sum2&&sum1==0) {
+//                 printf("Bob\n");
+//            } else
+            printf("Alice\n");
+        }
+        else {
 
+            if(v==v1)
+                printf("Bob\n");
+            else printf("Alice\n");
+        }
+    }
 
     return 0;
 }

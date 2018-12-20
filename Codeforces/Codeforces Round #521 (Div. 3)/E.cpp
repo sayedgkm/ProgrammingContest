@@ -47,6 +47,8 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+map<int,int> mp;
+vector<int> v;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +56,35 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
+//    vector<int> xx={1,3,6};
+//    int l = lower_bound(xx.begin()+2,xx.end(),6)-xx.begin();
+//    cout<<l<<endl;
+    int n= nxt();
     for(int i = 0;i<n;i++) {
-
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+        int a = nxt();
+        mp[a]++;
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+    for(auto it: mp) v.pb(it.ss);
+    sort(ALL(v));
+    ll res = 0;
+    for(int i = 1;i<=n;i++) {
 
+        ll tmp = 0;
+        ll cur = i;
+        ll last = 0;
+        while(cur<=n) {
+            int l = lower_bound(v.begin()+last,v.end(),cur)-v.begin();
+//            if(i==3) {
+//                debug(l,last);
+//            }
+            if(l>=v.size()) break;
+            if(v[l]>=cur) tmp+=cur;
+            cur*=2;
+            last = l+1;
+        }
+        res = max(tmp,res);
+    }
+    printf("%lld\n",res);
 
     return 0;
 }

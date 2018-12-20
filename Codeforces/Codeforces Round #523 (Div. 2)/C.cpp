@@ -47,6 +47,9 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+ll dp[N];
+vector<int> v[N];
+ll dp2[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +57,24 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
 
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
+    for(int i = 1;i<N;i++) {
+        for(int j = i;j<N;j+=i) {
+            v[j].pb(i);
         }
-        mp[Xor]++;
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+    int n = nxt();
+    for(int i =0;i<n;i++) ar[i] = nxt();
 
-
+    for(int i = n-1;i>=0;i--) {
+        int cur = ar[i];
+        for(int j = 0;j<(int)v[cur].size();j++) {
+            int tmp = v[cur][j];
+            dp[tmp]+=(dp[tmp+1]+1);
+            while(dp[tmp]>=M) dp[tmp]-=M;
+        }
+    }
+    dp[1]%=M;
+    cout<<dp[1]<<endl;
     return 0;
 }

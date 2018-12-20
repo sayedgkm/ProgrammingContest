@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               1000010
+#define        N                               2000010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -47,6 +47,10 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+vector<int> v[N];
+int mark[N];
+int cnt[N];
+vector<int> res;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +58,34 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
+
+    ll sum = 0;
+    int n = nxt();
     for(int i = 0;i<n;i++) {
-
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+        ar[i] = nxt();
+        sum+=ar[i];
+        cnt[ar[i]]++;
+        v[ar[i]].pb(i);
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
 
+    for(int i = 0;i<n;i++) {
+        ll Left = sum-ar[i]-ar[i];
+        if(Left>=N) continue;
+        if(Left<0||mark[Left]) continue;
+        mark[Left] = 1;
+        if(v[Left].size()) {
+            for(auto it : v[Left]) {
+                if(it==i&&cnt[ar[i]]==1) continue;
+                res.pb(it);
+            }
+        }
 
+    }
+   // res.pb(3);
+    sort(ALL(res));
+    res.erase(unique(res.begin(),res.end()),res.end());
+    cout<<res.size()<<endl;
+    for(int i = 0;i<res.size();i++) printf("%d ",res[i]+1);
+    printf("\n");
     return 0;
 }

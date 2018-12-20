@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               1000010
+#define        N                               200110
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -47,6 +47,17 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+int cnt[N];
+bool isPossible(int mid,int n,int k) {
+    if(mid==0) return true;
+    int sum = 0;
+    for(int i = 0;i<N;i++) {
+        if(cnt[i]>=mid) {
+            sum+=cnt[i]/mid;
+        }
+    }
+    return sum>=k;
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +65,30 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
+    int n = nxt();
     int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
+    for(int i = 0;i<n;i++) ar[i] = nxt(),cnt[ar[i]]++;
 
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+    int lo = 1;
+    int hi = n;
+    while(lo<=hi) {
+        int mid = (lo+hi)/2;
+        if(isPossible(mid,n,k)) lo = mid+1;
+        else hi = mid-1;
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+    lo--;
 
+    vector<int> v;
+    for(int i = 0;i<N&&k;i++) {
+        if(cnt[i]>=lo) {
+            int nibo = cnt[i]/lo;
+            while(nibo--&&k-->0) {
+                v.pb(i);
+            }
+        }
+    }
+    for(int i = 0;i<v.size();i++) printf("%d ",v[i]);
+    printf("\n");
 
     return 0;
 }

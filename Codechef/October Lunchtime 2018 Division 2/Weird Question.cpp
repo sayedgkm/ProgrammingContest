@@ -47,6 +47,41 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+vector<int> tree[4*N];
+ vector<int> filter;
+///Each of tree nodes keep all values sorted from index low to high
+void buildSegment_tree(int node,int low,int high) {
+    if(low==high) {
+        tree[node].clear();
+        tree[node].pb(ar[filter[low]]);
+        return;
+    }
+    int left=2*node;
+    int right=2*node+1;
+    int mid=(low+high)/2;
+    buildSegment_tree(left,low,mid);
+    buildSegment_tree(right,mid+1,high);
+    int sz=tree[left].size();
+    int sz1=tree[right].size();
+    //tree[node].clear();
+    tree[node].resize(sz+sz1);
+    merge(tree[left].begin(),tree[left].begin()+sz,tree[right].begin(),tree[right].begin()+sz1,tree[node].begin());
+}
+int query(int node,int low,int hi,int i,int j,int val) {
+    /// returns how many numbers are less than or equal to value
+    /// from index i to j
+    if(i>hi||j<low) return 0;
+    if(low>=i&&hi<=j){
+       // debug(low,hi,tree[node].size(),node);
+        return lower_bound(tree[node].begin(),tree[node].end(),val)-tree[node].begin();
+    }
+    int mid=(low+hi)/2;
+    int left=2*node;
+    int right=left+1;
+    int x= query(left,low,mid,i,j,val);
+    int y= query(right,mid+1,hi,i,j,val);
+    return x+y;
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,29 +89,32 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
+    int test = nxt();
+    while(test--) {
+        int n = nxt();
+        filter.pb(0);
+        for(int i = 0;i<n;i++) {
+            int a= nxt();
+            if(ar[a]==0) filter.pb(a);
+            ar[a]++;
 
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
         }
-        mp[Xor]++;
+        sort(ALL(filter));
+        buildSegment_tree(1,1,filter.size()-1);
+        ll res = 0;
+        for(int i =1;i<filter.size();i++) {
+            int oc = ar[filter[i]];
+            int l = upper_bound(ALL(filter),oc)-filter.begin();
+            l--;
+            res+=l-query(1,1,filter.size()-1,1,l,filter[i]);
+            //debug(l,filter[i],res);
+        }
+        printf("%lld\n",res);
+        for(auto it : filter) ar[it] =0;
+        for(int i =0;i<4*(int)filter.size();i++) tree[i].clear();
+        filter.clear();
+
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
 
 
     return 0;

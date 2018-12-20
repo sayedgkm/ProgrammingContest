@@ -47,6 +47,16 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+#define EPS 1e-9
+inline int dcmp (double x) { return x < -EPS ? -1 : (x > EPS); }
+bool isValid(int x,int y,int z) {
+    vector<int> v;
+    v.pb(ar[x]);
+    v.pb(ar[y]);
+    v.pb(ar[z]);
+    sort(ALL(v));
+    return v[0]+v[1]>v[2];
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +64,51 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
+    int test = nxt();
+    while(test--) {
 
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
+        int n = nxt();
+        double p = dxt();
+        double q = dxt();
+        for(int i = 0;i<n;i++) {
+            ar[i] = nxt();
         }
-        mp[Xor]++;
-    }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+        sort(ar,ar+n);
+        int x1=-1,y1=-1,z1=-1;
+        double theta = EPS;
+        for(int i = 0;i<n;i++) {
+            for(int j = i+1;j<n;j++) {
+                double z = ar[i];
+                double y = ar[j];
+                double need = z*z+y*y-2*z*y*(p/q);
+                need = sqrt(need);
+                double alpha = (acos(p/q)*180.0)/pi;
+                int lagbe = (int) need;
+               // if(lagbe>=ar[i]+ar[j]) continue;
+               // cout<<lagbe<<endl;
+                int l = upper_bound(ar,ar+n,lagbe)-ar;
+                l--;
+               // cout<<l<<' '<<i<<' '<<j<<endl;
+                if(l==j||l==i) l--;
+                if(l==j||l==i) l--;
+                if(l>=0) {
+                    if(!isValid(i,j,l)) continue;
+                    if(alpha>=theta) {
+                        x1 = l;
+                        y1 = j;
+                        z1 = i;
+                        theta = alpha;
+                    }
 
+                }
+
+
+            }
+        }
+        if(x1==-1) {
+            printf("-1\n");
+        } else printf("%d %d %d\n",x1+1,y1+1,z1+1);
+    }
 
     return 0;
 }

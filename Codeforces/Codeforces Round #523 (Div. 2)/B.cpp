@@ -47,6 +47,7 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+vector<ll> v;
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,29 +55,30 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
-
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+    ll bad = 0;
+    int n = nxt();
+    ll m = lxt();
+    ll mx = 0;
+    for(int i =0;i<n;i++) {
+        ll a= lxt();
+        bad+=(a-1);
+        v.pb(a);
+        mx = max(mx,a);
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+    v.pb(0);
+    sort(ALL(v));
+    while(v.size()) {
+        if(v.back()>=mx) v.pop_back(),mx--;
+        else {
+            ll diff =(ll) (mx-v.back());
+            bad-=diff;
+            mx = v.back();
+            mx--;
+            v.pop_back();
+        }
+
+    }
+    cout<<bad<<endl;
 
 
     return 0;

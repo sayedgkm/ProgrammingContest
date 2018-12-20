@@ -47,6 +47,38 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+int n;
+map<vector<int> ,int > dp[52];
+int go(vector<int> v,int sum) {
+    //debug(v.size(),sum,n);
+    if(sum<0) return 0;
+    if((int)v.size()==n) {
+        int res = 0;
+        for(int i  =0;i<v.size();i++) {
+            for(int j= i+1;j<v.size();j++) {
+                res+=gcd(v[i],v[j]);
+            }
+        }
+        if(sum==0) return res;
+        return 0;
+    }
+    if(dp[sum].count(v)) return dp[sum][v];
+   // cout<<v.size()<<endl;
+    int res = 0;
+    int ind = v.size();
+    if(ar[ind]>0){
+        v.pb(ar[ind]);
+        res+=go(v,sum-ar[ind]);
+        v.pop_back();
+    } else {
+        for(int i = 1;i<=sum;i++) {
+            v.pb(i);
+            res+=go(v,sum-i);
+            v.pop_back();
+        }
+    }
+    return dp[sum][v]=res;
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +86,15 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
+    int test = nxt();
+    while(test--) {
+        n = nxt();
+        int s = nxt();
+        for(int i =0;i<n;i++) ar[i] = nxt();
+        cout<<go({},s)<<endl;
+        for(int i = 0;i<52;i++) dp[i].clear();
 
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
-
 
     return 0;
 }

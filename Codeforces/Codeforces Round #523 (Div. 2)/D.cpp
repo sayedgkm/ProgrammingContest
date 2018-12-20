@@ -47,6 +47,12 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+vector<pll> v;
+multiset<ll> ms;
+bool cmp(pll x,pll y) {
+    if(x.ss==y.ss) return x.ff>y.ff;
+    return x.ss<y.ss;
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +60,39 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
+    int n =nxt();
+    ll x = lxt();
+    ll y = lxt();
     for(int i = 0;i<n;i++) {
-
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+        ll a= lxt();
+        ll b= lxt();
+        v.pb(make_pair(a,b));
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
-
+    sort(ALL(v));
+    ll tot = 0;
+    for(int i = 0;i<v.size();i++) {
+        ll st = v[i].ff;
+        ll ed = v[i].ss;
+       // debug(st,ed);
+        auto it = ms.lower_bound(st);
+        if(it==ms.begin()) {
+           // cout<<st<<" " <<ed<<endl;
+            ms.insert(ed);
+            tot+=x+(ed-st)*y;
+        } else {
+            it--;
+            ll prev = *it;
+            ms.erase(it);
+            ll c1 = (ed-prev)*y;
+            ll c2 = x+(ed-st)*y;
+            if(c1<c2) tot+=c1;
+            else tot+=c2;
+            ms.insert(ed);
+        }
+        tot%=M;
+       // cout<<tot<<endl;
+    }
+    cout<<tot%M<<endl;
 
     return 0;
 }

@@ -46,7 +46,8 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-int ar[N];
+ll ar[N];
+ll ans[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +55,38 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
-
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
+    int n = nxt();
+    for(int i = 0;i<n/2;i++) ar[i] = lxt();
+    int i = 0;
+    int j = n-1;
+    ans[i]=0;
+    ans[j] = ar[0];
+    i++;
+    j--;
+    int x = 1;
+    while(i<=j) {
+        ll val = ar[x++];
+        if(val<=ans[j+1]){
+            ans[j] = val-ans[i-1];
+            ans[i] = ans[i-1];
         } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
+            ll ex = val-ans[j+1];
+            val = ans[j+1];
+            if(ex<ans[i-1]) {
+                ll need = ans[i-1]-ex;
+                ex+=need;
+                val-=need;
+            }
+            ans[i] = ex;
+            ans[j] = val;
         }
-        mp[Xor]++;
+        i++;
+        j--;
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
-
-
+    for(int i =0;i<n;i++) {
+        if(i) printf(" ");
+        printf("%lld",ans[i]);
+    }
+    printf("\n");
     return 0;
 }

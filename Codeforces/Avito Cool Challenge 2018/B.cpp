@@ -47,6 +47,9 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+int mark[N];
+vector<int> v;
+int ans[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,29 +57,31 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
-
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+    int n = nxt();
+    for(int i =0;i<n;i++) {
+        ar[i] = nxt();
+        mark[ar[i]]++;
+        if(mark[ar[i]]==1) v.pb(ar[i]);
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+    if(n==2&&ar[0]==1&&ar[1]==1) {
+        cout<<"Possible"<<endl;
+        cout<<1<<" " <<2<<endl;
+        return 0;
+    }
+    for(int i = 0;i<v.size();i++) ans[v[i]]= i+1;
+    for(int i = 0;i<v.size();i++) {
+        int cnt = mark[v[i]];
+        if(n-cnt!=v[i]) {
+            printf("Impossible\n");
+            return 0;
+        }
+    }
+    cout<<"Possible"<<endl;
+    for(int i = 0;i<n;i++) {
+        if(i) printf(" ");
+        printf("%d",ans[ar[i]]);
+    }
+    printf("\n");
 
 
     return 0;

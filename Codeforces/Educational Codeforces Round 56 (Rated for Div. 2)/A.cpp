@@ -46,7 +46,7 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-int ar[N];
+int dp[N];
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +54,23 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
+    vector<int> v ={2,3,4,5,6,7};
 
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+    for(int i = 0;i<=100;i++) {
+        dp[i] = 100000000;
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
-
+    dp[0]=0;
+    for(int i = 0;i<v.size();i++) {
+        int val = v[i];
+        for(int j = val;j<=100;j++) {
+            dp[j]= min(dp[j-val]+1,dp[j]);
+        }
+    }
+    int test = nxt();
+    while(test--) {
+        int n = nxt();
+        printf("%d\n",dp[n]);
+    }
 
     return 0;
 }

@@ -12,7 +12,7 @@
 #define        ff                              first
 #define        ss                              second
 #define        pb                              push_back
-#define        inf                              (1e9)+1000
+#define        inf                             (ll)(1e14)+1000
 #define        eps                             1e-9
 #define        ALL(x)                          x.begin(),x.end()
 using namespace std;
@@ -46,7 +46,23 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-int ar[N];
+long long ar[N];
+int n,k;
+long long dp[205][205][205];
+ll go (int pos,int last,int x) {
+    if(x<0) return -inf;
+    if(pos>n) {
+        if(x==0) return 0;
+        return -inf;
+    }
+    ll &res = dp[pos][last][x];
+    if(res!=-1) return res;
+    res = -inf;
+    res = max(res,go(pos+1,pos,x-1)+ar[pos]);
+    if(pos<last+k)
+        res = max(res,go(pos+1,last,x));
+    return res;
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +70,16 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
-
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+    n = nxt();
+    k = nxt();
+    int x =nxt();
+    for(int i = 1;i<=n;i++) {
+        ar[i] = lxt();
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
-
+    SET(dp);
+    ll res = go(0,0,x);
+    if(res<0) res = -1;
+    printf("%lld\n",res);
 
     return 0;
 }

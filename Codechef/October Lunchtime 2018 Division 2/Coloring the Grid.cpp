@@ -6,7 +6,7 @@
 #define        pll                             pair<ll,ll>
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
-#define        N                               1000010
+#define        N                               1010
 #define        M                               1000000007
 #define        pi                              acos(-1.0)
 #define        ff                              first
@@ -47,6 +47,13 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+char s[N][N];
+int color[N][N];
+int n,m;
+bool isvalid(int i,int j) {
+    if(i>=0&& i<n&&j>=0&&j<m&&s[i][j]=='.') return true;
+    return false;
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +61,43 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
+    int test = nxt();
+    while(test--) {
 
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
+        n = nxt();
+        m= nxt();
+        for(int i = 0;i<n;i++) scanf("%s",s[i]);
+        for(int i = 0;i<n;i++) {
+            for(int j =0;j<m;j++) {
+                if(s[i][j]=='#')continue;
+                if(isvalid(i,j+1)&&isvalid(i-1,j)&&isvalid(i-1,j+1)) {
+                    color[i][j+1]= color[i-1][j]= color[i-1][j+1] = 1;
+                }
+                if(isvalid(i,j-1)&&isvalid(i-1,j)&&isvalid(i-1,j-1)) {
+                    color[i][j-1]= color[i-1][j]= color[i-1][j-1] = 1;
+                }
+                if(isvalid(i,j+1)&&isvalid(i+1,j)&&isvalid(i+1,j+1)) {
+                    color[i][j+1]= color[i+1][j]= color[i+1][j+1] = 1;
+                }
+                if(isvalid(i,j-1)&&isvalid(i+1,j)&&isvalid(i+1,j-1)) {
+                    color[i][j-1]= color[i+1][j]= color[i+1][j-1] = 1;
+                }
+            }
         }
-        mp[Xor]++;
-    }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+        bool f = 0;
+        for(int i = 0;i<n;i++) {
+            for(int j = 0;j<m;j++) {
+                if(color[i][j]==0&&s[i][j]=='.') {
+                    f = 1;
+                    break;
+                }
+            }
+            if(f) break;
+        }
+        puts(f?"NO":"YES");
+        for(int i = 0;i<=n;i++) for(int j = 0;j<=m;j++) color[i][j]=0;
 
+    }
 
     return 0;
 }

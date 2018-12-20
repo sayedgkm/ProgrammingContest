@@ -7,7 +7,7 @@
 #define        CLR(a)                          memset(a,0,sizeof(a))
 #define        SET(a)                          memset(a,-1,sizeof(a))
 #define        N                               1000010
-#define        M                               1000000007
+#define        M                               998244353
 #define        pi                              acos(-1.0)
 #define        ff                              first
 #define        ss                              second
@@ -47,6 +47,57 @@ for(; e > 0; e >>= 1){
 #endif
 ///******************************************START******************************************
 int ar[N];
+vector<int> adj[N];
+int color[N];
+bool bfs(int u) {
+
+    color[u] = 1;
+    queue<int> q;
+    q.push(u);
+    while(!q.empty()) {
+        u = q.front();
+        q.pop();
+        int x = color[u];
+        if(x==1) x = 2;
+        else x = 1;
+        for(auto v : adj[u]) {
+            if(color[v]==0) {
+                color[v] = x;
+                q.push(v);
+
+            } else {
+                if(color[v]==color[u]) return false;
+            }
+        }
+
+    }
+    return true;
+}
+void dfs(int u,long long &ans,long long gun) {
+    color[u] = 1;
+
+    for(auto it : adj[u]) {
+
+        if(color[it]==0) {
+            long long temp;
+            if(gun==2) temp = 1LL;
+            else temp = 2LL;
+            ans*=temp;
+            ans%=M;
+            dfs(it,ans,temp);
+        }
+    }
+
+}
+
+void dfsNot(int u) {
+    color[u]=0;
+    for(auto it : adj[u]) {
+        if(color[it]) {
+            dfsNot(it);
+        }
+    }
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +105,58 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
-
-        int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
+    int test = nxt();
+    while(test--) {
+        int n = nxt();
+        int m = nxt();
+        for(int i = 0;i<m;i++) {
+            int a= nxt();
+            int b= nxt();
+            adj[a].pb(b);
+            adj[b].pb(a);
         }
-        mp[Xor]++;
-    }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
+        bool f = 0;
+        for(int i = 1;i<=n;i++) {
+            if(color[i]==0) {
+                if(bfs(i)==0) {
+                    f = 1;
+                    break;
+                }
+            }
+        }
+        for(int i = 1;i<=n;i++){
 
+                color[i]=0;
+        }
+        if(f==1) {
+            printf("0\n");
+        } else {
+            long long ans = 1;
+            long long subAns = 1;
+            for(int i = 1;i<=n;i++) {
+                if(color[i]==0) {
+                    subAns = 2;
+                    dfs(i,subAns,subAns);
+                    long long temp = subAns;
+                    dfsNot(i);
+                    subAns = 1;
+                    dfs(i,subAns,subAns);
+                    //cout<<subAns<<" "<<temp<<endl;
+                    temp+=subAns;
+                    temp%=M;
+                    ans= ans*temp;
+                    ans%=M;
+                }
+            }
+            printf("%lld\n",ans);
+        }
+
+        for(int i = 0;i<=n;i++) {
+            color[i] = 0;
+            adj[i].clear();
+        }
+
+    }
 
     return 0;
 }

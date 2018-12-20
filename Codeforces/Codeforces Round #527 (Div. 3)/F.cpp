@@ -46,7 +46,60 @@ for(; e > 0; e >>= 1){
     #define debug(...)
 #endif
 ///******************************************START******************************************
-int ar[N];
+ll ar[N];
+vector<int> adj[N];
+vector<int> v;
+vector<long long> cost;
+int st[N],ed[N];
+int t = 1;
+ll level[N];
+void dfs(int u,int p =-1) {
+    v.push_back(u);
+    cost.pb(ar[u]);
+    st[u] = t++;
+    for(auto it:adj[u] ) {
+        if(it==p) continue;
+        level[it] = level[u]+1;
+        dfs(it,u);
+    }
+
+    ed[u] = t-1;
+}
+ll tree[N];
+void update(int idx,int n,int x)
+{
+    while(idx<=n)
+    {
+        tree[idx]+=x;
+        idx+= idx&(-idx);
+    }
+}
+ll query(int idx){
+     ll sum=0;
+     while(idx>0)
+     {
+         sum+=tree[idx];idx-=idx&(-idx);
+     }
+   return sum;
+}
+ll sum(int i,int j) {
+    return query(j)-query(i-1);
+}
+ll mx = 0;
+ll totSum = 0;
+void dfsAgain(int u,int p,ll res) {
+        mx = max(res,mx);
+        for(auto it : adj[u]) {
+            if(it==p) continue;
+            ll temp= res;
+            ll sub = sum(st[it],ed[it]);
+            ll add = totSum-sub;
+            temp-=sub;
+            temp+=add;
+            dfsAgain(it,u,temp);
+        }
+
+}
 int main(){
     #ifdef sayed
     //freopen("out.txt","w",stdout);
@@ -54,30 +107,28 @@ int main(){
     #endif
     //ios_base::sync_with_stdio(false);
     //cin.tie(0);
-    map<int,int> mp;
-    ll n = lxt();
-    int k = nxt();
-    int Xor = 0;
-    ll ans = 0;
-    for(int i = 0;i<n;i++) {
 
+    int n = nxt();
+    for(int i =1;i<=n;i++)  ar[i] = lxt(),totSum+=ar[i];
+    for(int i = 0;i<n-1;i++) {
         int a= nxt();
-        int aI= ((1<<k)-1)^a;
-        if(mp[a]<=mp[aI]) {
-            ans+=mp[a];
-            Xor^=a;
-            debug(a);
-        } else {
-            debug(aI);
-            ans+=mp[aI];
-            Xor^=aI;
-        }
-        mp[Xor]++;
+        int b = nxt();
+        adj[a].pb(b);
+        adj[b].pb(a);
     }
-    debug(ans);
-    ans = ((n*n+n)/2)-ans;
-    cout<<ans<<endl;
-
+    v.pb(0);
+    cost.pb(0);
+    dfs(1);
+    mx = 0;
+    long long res = 0;
+    for(int i =1;i<=n;i++) {
+        res+=level[i]*ar[i];
+    }
+    for(int i = 1;i<=n;i++) {
+        update(i,n,cost[i]);
+    }
+    dfsAgain(1,-1,res);
+    cout<<mx<<endl;
 
     return 0;
 }
